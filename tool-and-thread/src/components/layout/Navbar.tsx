@@ -19,6 +19,7 @@ export default function Navbar() {
 
   const navItems = session ? [
     { href: "/admin", label: "Admin" },
+    { href: "/settings", label: "Settings" },
     {
       href: "#",
       label: "Sign Out",
