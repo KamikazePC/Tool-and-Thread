@@ -45,50 +45,50 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Welcome back
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Enter your email to sign in to your account
-          </p>
-        </div>
-        <div className="grid gap-6">
-          <form onSubmit={onSubmit}>
-            <div className="grid gap-2">
-              <div className="grid gap-1">
-                <Label className="sr-only" htmlFor="email">
-                  Email
-                </Label>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted">
+      <div className="flex-1 flex items-center justify-center px-4 py-8 md:py-16">
+        <div className="w-full max-w-sm md:max-w-md bg-card rounded-lg shadow-lg p-6 md:p-8 space-y-6">
+          {/* Header */}
+          <div className="space-y-2 text-center">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+              Welcome back
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Enter your credentials to continue
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   placeholder="name@example.com"
                   type="email"
+                  name="email"
                   autoCapitalize="none"
                   autoComplete="email"
                   autoCorrect="off"
                   disabled={isLoading}
-                  name="email"
                   required
+                  className="w-full"
                 />
               </div>
-              <div className="grid gap-1">
-                <Label className="sr-only" htmlFor="password">
-                  Password
-                </Label>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
-                    placeholder="Password"
+                    placeholder="Enter your password"
                     type={showPassword ? "text" : "password"}
-                    autoCapitalize="none"
-                    autoComplete="current-password"
-                    autoCorrect="off"
-                    disabled={isLoading}
                     name="password"
+                    autoComplete="current-password"
+                    disabled={isLoading}
                     required
+                    className="w-full pr-10"
                   />
                   <button
                     type="button"
@@ -103,29 +103,47 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
-              <Button disabled={isLoading}>
-                {isLoading && (
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-white" />
-                )}
-                Sign In
-              </Button>
             </div>
+
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-white" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
           </form>
+
+          {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-card px-2 text-muted-foreground">
                 Or
               </span>
             </div>
           </div>
-          <Link href="/register">
-            <Button variant="outline" className="w-full">
-              Create an account
-            </Button>
-          </Link>
+
+          {/* Register Link */}
+          <div className="text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?
+            </p>
+            <Link href="/register" className="block">
+              <Button variant="outline" className="w-full">
+                Create an account
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

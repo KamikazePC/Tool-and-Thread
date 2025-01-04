@@ -33,69 +33,78 @@ export default function RegisterPage() {
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
+        const error = await response.json();
+        throw new Error(error.message || "Failed to register");
       }
 
+      toast.success("Registration successful");
       router.push("/login");
-      toast.success("Account created successfully");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create account");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Create an account
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Enter your email below to create your account
-          </p>
-        </div>
-        <div className="grid gap-6">
-          <form onSubmit={onSubmit}>
-            <div className="grid gap-2">
-              <div className="grid gap-1">
-                <Label className="sr-only" htmlFor="email">
-                  Email
-                </Label>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted">
+      <div className="flex-1 flex items-center justify-center px-4 py-8 md:py-16">
+        <div className="w-full max-w-sm md:max-w-md bg-card rounded-lg shadow-lg p-6 md:p-8 space-y-6">
+          {/* Header */}
+          <div className="space-y-2 text-center">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+              Create an account
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Enter your details to get started
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   placeholder="name@example.com"
                   type="email"
+                  name="email"
                   autoCapitalize="none"
                   autoComplete="email"
                   autoCorrect="off"
                   disabled={isLoading}
-                  name="email"
                   required
+                  className="w-full"
                 />
               </div>
-              <div className="grid gap-1">
-                <Label className="sr-only" htmlFor="password">
-                  Password
-                </Label>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
-                    placeholder="Password"
+                    placeholder="Create a password"
                     type={showPassword ? "text" : "password"}
-                    autoCapitalize="none"
-                    autoComplete="new-password"
-                    autoCorrect="off"
-                    disabled={isLoading}
                     name="password"
+                    autoComplete="new-password"
+                    disabled={isLoading}
                     required
+                    className="w-full pr-10"
                   />
                   <button
                     type="button"
@@ -110,21 +119,19 @@ export default function RegisterPage() {
                   </button>
                 </div>
               </div>
-              <div className="grid gap-1">
-                <Label className="sr-only" htmlFor="confirmPassword">
-                  Confirm Password
-                </Label>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
-                    placeholder="Confirm Password"
+                    placeholder="Confirm your password"
                     type={showConfirmPassword ? "text" : "password"}
-                    autoCapitalize="none"
-                    autoComplete="new-password"
-                    autoCorrect="off"
-                    disabled={isLoading}
                     name="confirmPassword"
+                    autoComplete="new-password"
+                    disabled={isLoading}
                     required
+                    className="w-full pr-10"
                   />
                   <button
                     type="button"
@@ -139,29 +146,47 @@ export default function RegisterPage() {
                   </button>
                 </div>
               </div>
-              <Button disabled={isLoading}>
-                {isLoading && (
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-white" />
-                )}
-                Create Account
-              </Button>
             </div>
+
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-white" />
+                  Creating account...
+                </>
+              ) : (
+                "Create account"
+              )}
+            </Button>
           </form>
+
+          {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-card px-2 text-muted-foreground">
                 Or
               </span>
             </div>
           </div>
-          <Link href="/login">
-            <Button variant="outline" className="w-full">
-              Sign in
-            </Button>
-          </Link>
+
+          {/* Login Link */}
+          <div className="text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Already have an account?
+            </p>
+            <Link href="/login" className="block">
+              <Button variant="outline" className="w-full">
+                Sign in
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
