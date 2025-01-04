@@ -12,6 +12,7 @@ export default function ReceiptPage() {
   const buyer = searchParams.get("buyer")
   const items = searchParams.get("items")?.split(",")
   const total = searchParams.get("total")
+  const currency = searchParams.get("currency")
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return ""
@@ -48,89 +49,68 @@ export default function ReceiptPage() {
       {/* Back button - hidden in print */}
       <div className="print:hidden max-w-2xl mx-auto p-8">
         <Button
-          onClick={handleBack}
           variant="ghost"
-          className="mb-6 flex items-center gap-2"
+          onClick={handleBack}
+          className="mb-4"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Transactions
         </Button>
       </div>
 
-      {/* Receipt Content */}
-      <div className="max-w-2xl mx-auto p-8 print:p-4 print:mx-0 print:max-w-none bg-white">
-        {/* Header */}
-        <div className="text-center mb-12 border-b pb-6">
-          <h1 className="text-3xl font-serif mb-2">Tool & Thread</h1>
-          <div className="text-gray-500 space-y-1">
-            <p>Professional Tailoring Services</p>
+      {/* Receipt content */}
+      <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg print:shadow-none">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-2">Tool & Thread</h1>
+          <p className="text-gray-600">Receipt</p>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex justify-between mb-2">
+            <span className="text-gray-600">Date:</span>
+            <span>{formatDate(date)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Customer:</span>
+            <span>{buyer}</span>
           </div>
         </div>
 
-        {/* Transaction Details */}
-        <div className="mb-8 grid grid-cols-2 gap-8">
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">Date Issued</p>
-            <p className="font-medium">{formatDate(date)}</p>
+        <div className="border-t border-b py-4 mb-8">
+          <div className="font-medium mb-4">Items:</div>
+          <div className="space-y-2">
+            {items?.map((item, index) => (
+              <div key={index} className="flex justify-between">
+                <span>{item}</span>
+              </div>
+            ))}
           </div>
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">Customer</p>
-            <p className="font-medium">{buyer}</p>
-          </div>
         </div>
 
-        {/* Items Table */}
-        <div className="mb-12">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 text-sm font-medium text-gray-500">Description</th>
-                <th className="text-right py-3 text-sm font-medium text-gray-500">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {items?.map((item, index) => {
-                const [quantity, name, , price] = item.split(" ")
-                return (
-                  <tr key={index}>
-                    <td className="py-4">
-                      <div className="font-medium">{name}</div>
-                      <div className="text-sm text-gray-500">Quantity: {quantity}</div>
-                    </td>
-                    <td className="py-4 text-right tabular-nums">{price}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="border-t border-gray-200">
-                <td className="pt-6 font-medium text-gray-500">Total Amount</td>
-                <td className="pt-6 text-right font-bold text-lg tabular-nums">
-                  {total?.startsWith("NGN") ? total : total?.replace("$", "USD ")}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+        <div className="flex justify-between font-bold text-lg mb-8">
+          <span>Total:</span>
+          <span>{total}</span>
         </div>
 
-        {/* Footer */}
-        <div className="text-center text-sm text-gray-500 border-t pt-8">
-          <p className="mb-2">Thank you for your business!</p>
-          <p>For any inquiries, please contact us at support@toolandthread.com</p>
-        </div>
-
-        {/* Action Buttons - hidden in print */}
-        <div className="flex justify-end gap-4 mt-8 print:hidden">
-          <Button onClick={handlePrint} variant="outline" className="flex gap-2">
-            <Printer className="h-4 w-4" />
-            Print Receipt
-          </Button>
-          <Button onClick={handleShare} variant="outline" className="flex gap-2">
-            <Share2 className="h-4 w-4" />
+        {/* Action buttons - hidden in print */}
+        <div className="print:hidden flex justify-end space-x-4">
+          <Button
+            variant="outline"
+            onClick={handleShare}
+            className="flex items-center"
+          >
+            <Share2 className="h-4 w-4 mr-2" />
             Share
+          </Button>
+          <Button
+            onClick={handlePrint}
+            className="flex items-center"
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Print
           </Button>
         </div>
       </div>
     </div>
-  );
+  )
 }

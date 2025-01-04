@@ -1,10 +1,14 @@
-import './globals.css'
-import { Inter } from 'next/font/google'
-import { Toaster } from 'react-hot-toast'
-import { ThemeProvider } from "@/components/theme-provider"
-import Navbar from '@/components/layout/Navbar'
 
-const inter = Inter({ subsets: ['latin'] })
+
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { cn } from "@/lib/utils";
+import { ThemeProvider } from "@/components/theme-provider";
+import Navbar from "@/components/layout/Navbar";
+import { AuthProvider } from "@/components/auth-provider";
+import { Toaster } from "react-hot-toast";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: 'Tool & Thread',
@@ -14,26 +18,33 @@ export const metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="min-h-screen bg-background" suppressHydrationWarning>
-            <Navbar />
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {children}
-            </main>
-            <Toaster position="top-right" />
-          </div>
-        </ThemeProvider>
+      <body className={cn("min-h-screen bg-background antialiased", inter.className)} suppressHydrationWarning>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="flex min-h-screen flex-col" suppressHydrationWarning>
+              <Navbar />
+              <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+                {children}
+              </main>
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  className: 'react-hot-toast',
+                }}
+              />
+            </div>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
-  )
+  );
 }

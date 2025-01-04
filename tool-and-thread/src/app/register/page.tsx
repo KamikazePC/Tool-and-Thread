@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-hot-toast";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -20,23 +19,30 @@ export default function LoginPage() {
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+        }),
       });
 
-      if (result?.error) {
-        toast.error("Invalid credentials");
-        return;
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to register");
       }
 
-      router.push("/admin");
-      router.refresh();
+      toast.success("Registration successful");
+      router.push("/login");
     } catch (error) {
-      toast.error("Something went wrong");
+      toast.error(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -47,16 +53,30 @@ export default function LoginPage() {
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Welcome back
+            Create an account
           </h1>
           <p className="text-sm text-muted-foreground">
-            Enter your credentials to continue
+            Enter your details to create your account
           </p>
         </div>
 
         <div className="grid gap-6">
           <form onSubmit={onSubmit}>
             <div className="grid gap-2">
+              <div className="grid gap-1">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  placeholder="John Doe"
+                  type="text"
+                  name="name"
+                  autoCapitalize="none"
+                  autoComplete="name"
+                  autoCorrect="off"
+                  disabled={isLoading}
+                  required
+                />
+              </div>
               <div className="grid gap-1">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -78,7 +98,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   type="password"
                   name="password"
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   disabled={isLoading}
                   required
                 />
@@ -87,14 +107,14 @@ export default function LoginPage() {
                 {isLoading && (
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 )}
-                Sign In
+                Sign Up
               </Button>
             </div>
           </form>
           <div className="text-center text-sm">
-            Don't have an account?{" "}
-            <Link href="/register" className="underline">
-              Sign up
+            Already have an account?{" "}
+            <Link href="/login" className="underline">
+              Sign in
             </Link>
           </div>
         </div>

@@ -1,12 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Transaction } from '@/types';
+import { currencySymbols } from '@/lib/currency';
 
 export function useTransactions() {
   const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
-  const loadTransactions = async () => {
+  const formatCurrency = (amount: number, currency: string) => {
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency
+    });
+    return formatter.format(amount);
+  };
+
+  const loadTransactions = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -46,13 +56,14 @@ export function useTransactions() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const addTransaction = (newTransaction: Transaction) => {
     setTransactions(prev => [...prev, newTransaction]);
   };
 
   const removeTransaction = async (id: number) => {
+    setIsDeleting(id);
     try {
       const response = await fetch(`/api/transactions/${id}`, {
         method: 'DELETE',
@@ -67,7 +78,31 @@ export function useTransactions() {
     } catch (error) {
       console.error('Error deleting transaction:', error);
       throw error;
+    } finally {
+      setIsDeleting(null);
     }
+  };
+
+  const downloadReceipt = async (id: number) => {
+    const transaction = transactions.find(t => t.id === id);
+    if (!transaction) return;
+
+    const total = transaction.items.reduce(
+      (sum, item) => sum + (Number(item.price) * item.quantity),
+      0
+    );
+
+    const params = new URLSearchParams({
+      id: id.toString(),
+      date: new Date(transaction.date).toISOString(),
+      buyer: transaction.buyerName,
+      items: transaction.items.map(item => 
+        `${item.quantity}x ${item.name} @ ${formatCurrency(Number(item.price), transaction.currency)}`
+      ).join(','),
+      total: formatCurrency(total, transaction.currency)
+    });
+
+    window.open(`/receipt/${id}?${params.toString()}`);
   };
 
   useEffect(() => {
@@ -78,8 +113,10 @@ export function useTransactions() {
     transactions,
     isLoading,
     error,
+    isDeleting,
     addTransaction,
     removeTransaction,
+    downloadReceipt,
     refreshTransactions: loadTransactions
   };
 }

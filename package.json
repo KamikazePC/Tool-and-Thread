@@ -1,5 +1,11 @@
 {
   "dependencies": {
-    "date-fns": "^4.1.0"
+    "@auth/prisma-adapter": "^2.7.4",
+    "bcrypt": "^5.1.1",
+    "date-fns": "^4.1.0",
+    "next-auth": "^4.24.11"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2"
   }
 }
