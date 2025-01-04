@@ -1,0 +1,29 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Transaction {
+  id        Int           @id @default(autoincrement())
+  buyerName String
+  currency  String       @default("USD")
+  date      DateTime     @default(now())
+  items     Item[]       // One-to-many relationship with items
+  total     Float        @default(0)
+}
+
+model Item {
+  id            Int         @id @default(autoincrement())
+  name          String
+  price         Float
+  quantity      Int         @default(1)
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transactionId Int
+}
