@@ -76,7 +76,7 @@ export default function AdminPage() {
         throw new Error(errorData.error || 'Failed to create transaction');
       }
 
-      const newTransaction = await response.json();
+      await response.json();
       setShowForm(false);
       window.location.reload();
       toast.success('Transaction created successfully');

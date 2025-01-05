@@ -30,15 +30,11 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({
-      user: {
-        email: user.email,
-        name: user.name,
-      },
-    });
-  } catch (error) {
+    return NextResponse.json({ message: "User created successfully" });
+  } catch (err) {
+    console.error('Registration error:', err);
     return NextResponse.json(
-      { error: "Error creating user" },
+      { message: "Error creating user" },
       { status: 500 }
     );
   }

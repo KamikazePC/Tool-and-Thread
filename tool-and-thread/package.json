@@ -37,6 +37,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@prisma/client": "^6.1.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/pdfkit": "^0.13.8",
     "@types/react": "^19",

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import PDFDocument from 'pdfkit';
-import { Readable } from 'stream';
 import { prisma } from '@/lib/prisma';
+import type { Transaction } from '@/types';
+import PDFDocument from 'pdfkit';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,11 +12,11 @@ export async function POST(req: NextRequest) {
       const transaction = await prisma.transaction.create({
         data: {
           buyerName: body.buyerName,
-          total: body.price,
+          total: body.price.toString(),
           items: {
             create: [{
               name: body.itemName,
-              price: body.price,
+              price: body.price.toString(),
               quantity: 1
             }]
           }
@@ -25,7 +25,16 @@ export async function POST(req: NextRequest) {
           items: true
         }
       });
-      return NextResponse.json(transaction);
+
+      return NextResponse.json({
+        ...transaction,
+        date: transaction.date.toISOString(),
+        total: transaction.total.toString(),
+        items: transaction.items.map(item => ({
+          ...item,
+          price: item.price.toString()
+        }))
+      } as Transaction);
     }
     
     // Handle PDF generation
@@ -33,7 +42,7 @@ export async function POST(req: NextRequest) {
     const doc = new PDFDocument();
     const chunks: Buffer[] = [];
 
-    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('data', (chunk: Buffer) => chunks.push(chunk));
     doc.on('end', () => {
       const pdfBuffer = Buffer.concat(chunks);
       // In a production environment, we would save this to cloud storage
@@ -62,7 +71,7 @@ export async function POST(req: NextRequest) {
       // receiptUrl would be added here in production
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error processing order:', error);
     return NextResponse.json(
       { success: false, message: 'Error processing order' },
@@ -79,7 +88,7 @@ export async function GET() {
       }
     });
     return NextResponse.json(transactions);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching transactions:', error);
     return NextResponse.json(
       { error: 'Error fetching transactions' }, 

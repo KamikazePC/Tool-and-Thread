@@ -1,11 +1,21 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { CurrencyCode } from '@/lib/currency';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import type { Transaction, Item } from "@/types";
+
+interface CreateTransactionBody {
+  buyerName: string;
+  items: Array<{
+    name: string;
+    price: number;
+    quantity: number;
+  }>;
+  currency: string;
+}
 
 export async function POST(request: Request) {
   try {
     // Parse and validate request body
-    let body;
+    let body: CreateTransactionBody;
     try {
       body = await request.json();
     } catch (e) {
@@ -13,7 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid request body format' }, { status: 400 });
     }
 
-    const { buyerName, items, currency = 'USD' } = body;
+    const { buyerName, items, currency } = body;
 
     console.log('Received transaction data:', { buyerName, items, currency }); // Debug log
 
@@ -51,7 +61,7 @@ export async function POST(request: Request) {
       data: {
         buyerName,
         currency,
-        total,
+        total: Number(total),
         date: new Date(),
         items: {
           create: items.map(item => ({
@@ -66,46 +76,34 @@ export async function POST(request: Request) {
       }
     });
 
-    console.log('Created transaction:', transaction); // Debug log
-
-    // Format the response
     const response = {
       id: transaction.id,
       buyerName: transaction.buyerName,
       currency: transaction.currency,
-      date: transaction.date.toISOString(),
-      total: transaction.total,
-      items: transaction.items.map((item: { id: any; name: any; price: any; quantity: any; }) => ({
+      date: transaction.date.toString(),
+      total: transaction.total.toString(),
+      items: transaction.items.map(item => ({
         id: item.id,
         name: item.name,
-        price: item.price,
+        price: item.price.toString(),
         quantity: item.quantity
       }))
-    };
+    } as Transaction;
 
     // Return the formatted response
-    return new NextResponse(JSON.stringify(response), {
+    return NextResponse.json(response, {
       status: 201,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating transaction:', error);
     
-    return new NextResponse(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Failed to create transaction',
-        details: error instanceof Error ? error.stack : undefined
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Failed to create transaction',
+      details: error instanceof Error ? error.stack : undefined
+    }, {
+      status: 500,
+    });
   }
 }
 
@@ -120,23 +118,26 @@ export async function GET() {
       }
     });
 
-    return new NextResponse(JSON.stringify(transactions), {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  } catch (error) {
+    const formattedTransactions = transactions.map(t => ({
+      id: t.id,
+      buyerName: t.buyerName,
+      currency: t.currency,
+      date: t.date.toString(),
+      total: t.total.toString(),
+      items: t.items.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price.toString(),
+        quantity: item.quantity
+      }))
+    })) as Transaction[];
+
+    return NextResponse.json(formattedTransactions);
+  } catch (error: unknown) {
     console.error('Error fetching transactions:', error);
-    return new NextResponse(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Failed to fetch transactions'
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    return NextResponse.json(
+      { error: 'Failed to fetch transactions' },
+      { status: 500 }
     );
   }
 }
