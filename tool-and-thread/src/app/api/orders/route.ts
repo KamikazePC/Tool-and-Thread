@@ -38,7 +38,12 @@ export async function POST(req: NextRequest) {
     }
     
     // Handle PDF generation
-    const { customerName, items, total, id } = body;
+    const { customerName, items, total, id } = body as {
+      customerName: string;
+      items: Array<{ name: string; price: number; quantity: number }>;
+      total: number;
+      id: string;
+    };
     const doc = new PDFDocument();
     const chunks: Buffer[] = [];
 
@@ -60,7 +65,7 @@ export async function POST(req: NextRequest) {
     doc.fontSize(14).text(`Customer: ${customerName}`);
     doc.moveDown();
     
-    items.forEach((item: any) => {
+    items.forEach((item) => {
       doc.text(`${item.name} - Qty: ${item.quantity} - $${item.price.toFixed(2)}`);
     });
     

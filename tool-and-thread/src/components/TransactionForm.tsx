@@ -4,8 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Transaction } from "@/types";
-import { toast } from 'react-hot-toast';
 import { Trash2, Plus } from 'lucide-react';
 import { CurrencyCode, currencySymbols } from '@/lib/currency';
 
@@ -77,27 +75,29 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
     
     // Validate form
     const newErrors: FormErrors = {};
+    let validationFailed = false;
+    
     if (!buyerName.trim()) {
       newErrors.buyerName = "Buyer name is required";
+      validationFailed = true;
     }
 
-    let hasItemErrors = false;
     items.forEach((item, index) => {
       if (!item.name.trim()) {
         if (!newErrors.items) newErrors.items = [];
         newErrors.items[index] = newErrors.items[index] || {};
         newErrors.items[index].name = "Item name is required";
-        hasItemErrors = true;
+        validationFailed = true;
       }
       if (!item.price || item.price <= 0) {
         if (!newErrors.items) newErrors.items = [];
         newErrors.items[index] = newErrors.items[index] || {};
         newErrors.items[index].price = "Valid price is required";
-        hasItemErrors = true;
+        validationFailed = true;
       }
     });
 
-    if (Object.keys(newErrors).length > 0) {
+    if (validationFailed) {
       setErrors(newErrors);
       return;
     }

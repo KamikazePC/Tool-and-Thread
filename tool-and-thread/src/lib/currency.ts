@@ -6,19 +6,13 @@ export const currencySymbols: Record<CurrencyCode, string> = {
   NGN: '₦'
 };
 
-export const formatCurrency = (amount: number, currency: CurrencyCode = 'USD'): string => {
+export function formatCurrency(amount: number, currency: CurrencyCode): string {
   try {
-    const formatter = new Intl.NumberFormat('en', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    
-    return formatter.format(amount);
-  } catch (error) {
-    // Fallback formatting if Intl.NumberFormat fails
-    const symbol = currencySymbols[currency] || '$';
-    return `${symbol}${amount.toFixed(2)}`;
+      currency,
+    }).format(amount);
+  } catch {
+    return `${currencySymbols[currency]}${amount.toFixed(2)}`;
   }
 };

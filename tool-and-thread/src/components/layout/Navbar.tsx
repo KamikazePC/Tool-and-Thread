@@ -15,7 +15,7 @@ import {
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const navItems = session ? [
     { href: "/admin", label: "Admin" },

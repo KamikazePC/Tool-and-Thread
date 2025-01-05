@@ -12,7 +12,6 @@ export default function ReceiptPage() {
   const buyer = searchParams.get("buyer")
   const items = searchParams.get("items")?.split(",")
   const total = searchParams.get("total")
-  const currency = searchParams.get("currency")
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return ""

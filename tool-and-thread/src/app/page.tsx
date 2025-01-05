@@ -24,21 +24,16 @@ export default function LoginPage() {
     const password = formData.get("password") as string;
 
     try {
-      const result = await signIn("credentials", {
+      setIsLoading(true);
+      await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
-
-      if (result?.error) {
-        toast.error("Invalid credentials");
-        return;
-      }
-
       router.push("/admin");
       router.refresh();
-    } catch (error) {
-      toast.error("Something went wrong");
+    } catch {
+      toast.error("Invalid credentials");
     } finally {
       setIsLoading(false);
     }
