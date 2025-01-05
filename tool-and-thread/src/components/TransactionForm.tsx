@@ -1,62 +1,56 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CurrencyCode, currencySymbols } from '@/lib/currency';
-import { Item } from '@/types';
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
+import type { Transaction } from "@/types";
 import { toast } from 'react-hot-toast';
 import { Trash2, Plus } from 'lucide-react';
+import { CurrencyCode, currencySymbols } from '@/lib/currency';
 
-interface NewItem {
-  name: string;
-  price: number;
-  quantity: number;
+interface FormData {
+  buyerName: string;
+  items: Array<{
+    name: string;
+    price: number;
+    quantity: number;
+  }>;
+  currency: string;
+  total: number;
 }
 
-type ItemError = {
-  name?: string;
-  price?: string;
-  quantity?: string;
-};
-
-type FormErrors = {
+interface FormErrors {
   buyerName?: string;
-  items?: Record<number, ItemError>;
-};
+  items?: Array<{
+    name?: string;
+    price?: string;
+    quantity?: string;
+  }>;
+}
 
-type TransactionFormProps = {
-  onSubmit: (data: { buyerName: string; items: NewItem[]; currency: CurrencyCode }) => void;
+interface TransactionFormProps {
+  onSubmit: (data: FormData) => void;
   isSubmitting?: boolean;
   onCancel?: () => void;
-};
+}
 
 export default function TransactionForm({ onSubmit, isSubmitting = false, onCancel }: TransactionFormProps) {
   const [buyerName, setBuyerName] = useState('');
   const [currency, setCurrency] = useState<CurrencyCode>('USD');
-  const [items, setItems] = useState<NewItem[]>([{ 
+  const [items, setItems] = useState([{ 
     name: '',
     price: 0,
     quantity: 1 
   }]);
-  const [errors, setErrors] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const parsePrice = (price: string | number): number => {
     if (typeof price === 'number') return price;
     return parseFloat(price.replace(/[^0-9.-]+/g, "")) || 0;
   };
 
-  const updateItem = (index: number, field: keyof NewItem, value: string | number) => {
+  const updateItem = (index: number, field: keyof typeof items[number], value: string | number) => {
     const newItems = [...items];
     newItems[index] = {
       ...newItems[index],
@@ -82,7 +76,7 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
     e.preventDefault();
     
     // Validate form
-    const newErrors: Record<string, any> = {};
+    const newErrors: FormErrors = {};
     if (!buyerName.trim()) {
       newErrors.buyerName = "Buyer name is required";
     }
@@ -90,13 +84,13 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
     let hasItemErrors = false;
     items.forEach((item, index) => {
       if (!item.name.trim()) {
-        if (!newErrors.items) newErrors.items = {};
+        if (!newErrors.items) newErrors.items = [];
         newErrors.items[index] = newErrors.items[index] || {};
         newErrors.items[index].name = "Item name is required";
         hasItemErrors = true;
       }
       if (!item.price || item.price <= 0) {
-        if (!newErrors.items) newErrors.items = {};
+        if (!newErrors.items) newErrors.items = [];
         newErrors.items[index] = newErrors.items[index] || {};
         newErrors.items[index].price = "Valid price is required";
         hasItemErrors = true;
@@ -118,16 +112,12 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
     onSubmit({
       buyerName,
       items: formattedItems,
-      currency
+      currency,
+      total: formattedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     });
   };
 
-  const formattedTotal = (() => {
-    const total = items.reduce((sum, item) => {
-      return sum + (parsePrice(item.price) * item.quantity);
-    }, 0);
-    return `${currencySymbols[currency]}${total.toFixed(2)}`;
-  })();
+  const formattedTotal = items.reduce((sum, item) => sum + (parsePrice(item.price) * item.quantity), 0);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-card p-6 rounded-lg border md:p-8">
@@ -150,16 +140,11 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
           <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-[1fr,1fr,auto,auto] sm:gap-4 items-end bg-background p-4 rounded-md">
             <div>
               <Label>Currency</Label>
-              <Select value={currency} onValueChange={(value: CurrencyCode) => setCurrency(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="USD">US Dollar ($)</SelectItem>
-                  <SelectItem value="GBP">British Pound (£)</SelectItem>
-                  <SelectItem value="NGN">Nigerian Naira (₦)</SelectItem>
-                </SelectContent>
-              </Select>
+              <select value={currency} onChange={(e) => setCurrency(e.target.value as CurrencyCode)}>
+                <option value="USD">US Dollar ($)</option>
+                <option value="GBP">British Pound (£)</option>
+                <option value="NGN">Nigerian Naira (₦)</option>
+              </select>
             </div>
           </div>
 
@@ -243,7 +228,7 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
 
       <div className="flex justify-between items-center">
         <div className="text-lg font-semibold">
-          Total: {formattedTotal}
+          Total: {currencySymbols[currency]}{formattedTotal.toFixed(2)}
         </div>
       </div>
 

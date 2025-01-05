@@ -78,11 +78,10 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: unknown) {
-    console.error('Error processing order:', error);
-    return NextResponse.json(
-      { success: false, message: 'Error processing order' },
-      { status: 500 }
-    );
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -95,10 +94,9 @@ export async function GET() {
     });
     return NextResponse.json(transactions);
   } catch (error: unknown) {
-    console.error('Error fetching transactions:', error);
-    return NextResponse.json(
-      { error: 'Error fetching transactions' }, 
-      { status: 500 }
-    );
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

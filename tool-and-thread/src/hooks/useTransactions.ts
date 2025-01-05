@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Transaction } from '@/types';
-import { currencySymbols } from '@/lib/currency';
+import type { Transaction } from '@/types';
 
 export function useTransactions() {
-  const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
@@ -19,39 +18,12 @@ export function useTransactions() {
   const loadTransactions = useCallback(async () => {
     try {
       setIsLoading(true);
+      const response = await fetch('/api/transactions');
+      if (!response.ok) throw new Error('Failed to fetch transactions');
+      const data = await response.json();
+      setTransactions(data);
       setError(null);
-      const response = await fetch('/api/transactions/initial');
-      
-      // Check if response is empty
-      const text = await response.text();
-      if (!text) {
-        console.log('Empty response received');
-        setTransactions([]);
-        return;
-      }
-
-      // Try to parse JSON
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        console.error('Failed to parse JSON:', text);
-        throw new Error('Invalid response format');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to load transactions');
-      }
-      
-      // Convert date strings to Date objects
-      const processedData = data.map((t: any) => ({
-        ...t,
-        date: new Date(t.date)
-      }));
-      
-      setTransactions(processedData);
     } catch (error) {
-      console.error('Error loading transactions:', error);
       setError(error instanceof Error ? error.message : 'Failed to load transactions');
     } finally {
       setIsLoading(false);
@@ -107,7 +79,7 @@ export function useTransactions() {
 
   useEffect(() => {
     loadTransactions();
-  }, []);
+  }, [loadTransactions]);
 
   return {
     transactions,
