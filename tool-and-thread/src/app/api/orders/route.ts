@@ -38,15 +38,21 @@ export async function POST(req: NextRequest) {
     }
     
     // Handle PDF generation
-    const { customerName, items, total } = body;
+    const { customerName, items, total, id } = body;
     const doc = new PDFDocument();
     const chunks: Buffer[] = [];
 
     doc.on('data', (chunk: Buffer) => chunks.push(chunk));
     doc.on('end', () => {
-      const pdfBuffer = Buffer.concat(chunks);
+      const result = Buffer.concat(chunks);
       // In a production environment, we would save this to cloud storage
-      // and return a URL instead of the raw buffer
+      // For now, we'll just send it directly
+      return new NextResponse(result, {
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="receipt-${id}.pdf"`,
+        },
+      });
     });
 
     doc.fontSize(25).text('Receipt', { align: 'center' });

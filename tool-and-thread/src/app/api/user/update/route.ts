@@ -1,17 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { hash, compare } from "bcrypt";
-import {prisma} from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function PATCH(req: Request) {
+export async function PATCH(req: NextRequest) {
   try {
-    const session = await getServerSession();
-    if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { email, currentPassword, newPassword } = body;
+    const data = await req.json();
+    const updates: Record<string, string> = {};
+
+    if (data.name) updates.name = data.name;
+    if (data.email) updates.email = data.email;
 
     // Get current user
     const user = await prisma.user.findUnique({
@@ -22,31 +26,27 @@ export async function PATCH(req: Request) {
       return new NextResponse("User not found", { status: 404 });
     }
 
-    let updates: any = {};
-
     // Update email if provided
-    if (email && email !== user.email) {
+    if (updates.email && updates.email !== user.email) {
       // Check if email is already taken
       const existingUser = await prisma.user.findUnique({
-        where: { email },
+        where: { email: updates.email },
       });
 
       if (existingUser) {
         return new NextResponse("Email already taken", { status: 400 });
       }
-
-      updates.email = email;
     }
 
     // Update password if provided
-    if (currentPassword && newPassword) {
+    if (data.currentPassword && data.newPassword) {
       // Verify current password
-      const passwordValid = await compare(currentPassword, user.password);
+      const passwordValid = await compare(data.currentPassword, user.password);
       if (!passwordValid) {
         return new NextResponse("Invalid current password", { status: 400 });
       }
 
-      updates.password = await hash(newPassword, 10);
+      updates.password = await hash(data.newPassword, 10);
     }
 
     // If no updates, return early

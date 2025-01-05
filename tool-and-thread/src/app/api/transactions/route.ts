@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { Transaction, Item } from "@/types";
+import type { Transaction } from "@/types";
 
 interface CreateTransactionBody {
   buyerName: string;

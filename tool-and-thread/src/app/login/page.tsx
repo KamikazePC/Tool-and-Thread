@@ -135,8 +135,8 @@ export default function LoginPage() {
 
           {/* Register Link */}
           <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Don't have an account?
+            <p className="text-sm text-gray-500">
+              Don&apos;t have an account yet? <Link href="/register" className="text-blue-500 hover:underline">Sign up</Link>
             </p>
             <Link href="/register" className="block">
               <Button variant="outline" className="w-full">
