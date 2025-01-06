@@ -6,12 +6,12 @@ import type { Transaction } from '@/types';
 
 export const runtime = 'nodejs';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const id = parseInt(params.id);
+    // Extract 'id' from the request URL
+    const { searchParams } = new URL(request.url);
+    const id = parseInt(searchParams.get('id') || '');
+
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid transaction ID' },
@@ -22,8 +22,8 @@ export async function GET(
     const dbTransaction = await prisma.transaction.findUnique({
       where: { id },
       include: {
-        items: true
-      }
+        items: true,
+      },
     });
 
     if (!dbTransaction) {
@@ -40,8 +40,8 @@ export async function GET(
       currency: dbTransaction.currency as CurrencyCode,
       items: dbTransaction.items.map(item => ({
         ...item,
-        price: item.price.toString()
-      }))
+        price: item.price.toString(),
+      })),
     };
 
     try {
