@@ -1,12 +1,20 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
-    const id = parseInt(params.id, 10);
+    // Extract 'id' from the request URL
+    const { searchParams } = new URL(request.url);
+    const id = parseInt(searchParams.get('id') || '', 10);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Invalid transaction ID' },
+        { status: 400 }
+      );
+    }
+
+    // Delete the transaction from the database
     await prisma.transaction.delete({
       where: {
         id,
