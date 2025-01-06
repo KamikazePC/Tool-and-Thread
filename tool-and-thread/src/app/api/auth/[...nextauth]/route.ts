@@ -10,12 +10,12 @@ const handler = NextAuth({
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: "Email", type: "email", placeholder: "example@example.com" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Missing email or password");
         }
 
         const user = await prisma.user.findUnique({
@@ -25,7 +25,7 @@ const handler = NextAuth({
         });
 
         if (!user) {
-          return null;
+          throw new Error("No user found with this email");
         }
 
         const isPasswordValid = await compare(
@@ -34,11 +34,11 @@ const handler = NextAuth({
         );
 
         if (!isPasswordValid) {
-          return null;
+          throw new Error("Invalid password");
         }
 
         return {
-          id: user.id + "",
+          id: user.id.toString(),
           email: user.email,
           name: user.name,
         };
@@ -49,6 +49,20 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  callbacks: {
+    async session({ session, token }) {
+      session.user = { id: token.sub, email: token.email, name: token.name };
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+  },
 });
 
 export { handler as GET, handler as POST };
