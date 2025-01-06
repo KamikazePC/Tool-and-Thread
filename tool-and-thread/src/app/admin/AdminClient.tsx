@@ -8,11 +8,11 @@ interface AdminClientProps {
   initialTransactions: Transaction[];
 }
 
-const formatDate = (date: Date) => {
+const formatDate = (date: string) => {
   return new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
     timeStyle: 'short'
-  }).format(date);
+  }).format(new Date(date));
 };
 
 export default function AdminClient({ initialTransactions }: AdminClientProps) {
@@ -50,13 +50,13 @@ export default function AdminClient({ initialTransactions }: AdminClientProps) {
                 <ul>
                   {transaction.items.map((item, index) => (
                     <li key={index}>
-                      {item.quantity}x {item.name} @ {formatCurrency(item.price, transaction.currency)}
+                      {item.quantity}x {item.name} @ {formatCurrency(parseFloat(item.price), transaction.currency)}
                     </li>
                   ))}
                 </ul>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {formatCurrency(transaction.total, transaction.currency)}
+                {formatCurrency(parseFloat(transaction.total), transaction.currency)}
               </td>
             </tr>
           ))}
