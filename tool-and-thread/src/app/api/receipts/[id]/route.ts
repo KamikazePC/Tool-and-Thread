@@ -8,10 +8,10 @@ export const runtime = 'nodejs';
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(context.params.id);
+    const id = parseInt(params.id);
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid transaction ID' },
