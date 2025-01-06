@@ -14,7 +14,7 @@ interface FormData {
     price: number;
     quantity: number;
   }>;
-  currency: string;
+  currency: CurrencyCode;
   total: number;
 }
 
