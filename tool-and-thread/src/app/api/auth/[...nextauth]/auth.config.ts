@@ -1,4 +1,3 @@
-import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -40,7 +39,7 @@ export const authOptions = {
         }
 
         return {
-          id: user.id,
+          id: user.id + "",
           email: user.email,
           name: user.name,
         };
@@ -50,23 +49,13 @@ export const authOptions = {
   session: {
     strategy: "jwt" as const,
   },
-  pages: {
-    signIn: "/",
-  },
   callbacks: {
-    async session({ session, token }: { session: Session; token: JWT }) {
+    session({ session, token }: { session: Session; token: JWT }) {
       if (token && session.user) {
         session.user.id = token.sub;
-      } else {
-        throw new Error("No user ID found in token");
       }
       return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
-
-const handler = NextAuth(authOptions);
-
-export const GET = handler;
-export const POST = handler;
