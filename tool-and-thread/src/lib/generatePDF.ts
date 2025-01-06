@@ -6,12 +6,12 @@ export async function generateReceipt(transaction: Transaction): Promise<Buffer>
   const doc = new jsPDF();
   
   // Helper function to add text and move cursor
-  const addText = (text: string, y: number, options: any = {}) => {
-    const defaults = { align: 'left', fontSize: 12 };
+  const addText = (text: string, y: number, options: { align?: 'left' | 'center' | 'right' | 'justify', fontSize?: number } = {}) => {
+    const defaults: { align: 'left' | 'center' | 'right' | 'justify', fontSize: number } = { align: 'left', fontSize: 12 };
     const settings = { ...defaults, ...options };
     
     doc.setFontSize(settings.fontSize);
-    doc.text(text, settings.align === 'center' ? doc.internal.pageSize.width / 2 : 20, y, {
+    doc.text(text, settings.align === 'center' ? doc.internal.pageSize.width / 2 : settings.align === 'right' ? doc.internal.pageSize.width - 20 : 20, y, {
       align: settings.align,
       maxWidth: doc.internal.pageSize.width - 40
     });
@@ -46,8 +46,8 @@ export async function generateReceipt(transaction: Transaction): Promise<Buffer>
   transaction.items.forEach((item) => {
     doc.text(item.name, 20, yPos);
     doc.text(item.quantity.toString(), 100, yPos);
-    doc.text(formatCurrency(item.price, transaction.currency), 140, yPos);
-    doc.text(formatCurrency(item.price * item.quantity, transaction.currency), 170, yPos);
+    doc.text(formatCurrency(parseFloat(item.price), transaction.currency), 140, yPos);
+    doc.text(formatCurrency(parseFloat(item.price) * item.quantity, transaction.currency), 170, yPos);
     yPos += 10;
   });
 
@@ -55,7 +55,7 @@ export async function generateReceipt(transaction: Transaction): Promise<Buffer>
 
   // Total
   doc.setFont('helvetica', 'bold');
-  doc.text(`Total Amount: ${formatCurrency(transaction.total, transaction.currency)}`, 170, yPos, { align: 'right' });
+  doc.text(`Total Amount: ${formatCurrency(parseFloat(transaction.total), transaction.currency)}`, 170, yPos, { align: 'right' });
 
   // Footer
   addText('Thank you for your business!', 200, { fontSize: 10, align: 'center' });
