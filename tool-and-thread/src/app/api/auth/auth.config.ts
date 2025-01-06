@@ -13,11 +13,11 @@ export const authOptions: AuthOptions = {
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Missing email or password");
         }
 
         const user = await prisma.user.findUnique({
@@ -27,7 +27,7 @@ export const authOptions: AuthOptions = {
         });
 
         if (!user) {
-          return null;
+          throw new Error("No user found with this email");
         }
 
         const isPasswordValid = await compare(
@@ -36,11 +36,11 @@ export const authOptions: AuthOptions = {
         );
 
         if (!isPasswordValid) {
-          return null;
+          throw new Error("Invalid password");
         }
 
         return {
-          id: user.id + "",
+          id: user.id.toString(),
           email: user.email,
           name: user.name,
         };
@@ -48,16 +48,25 @@ export const authOptions: AuthOptions = {
     }),
   ],
   session: {
-    strategy: "jwt" as const,
-  },
-  pages: {
-    signIn: "/",
+    strategy: "jwt",
   },
   callbacks: {
-    session({ session, token }: { session: Session; token: JWT }) {
-      if (token && session.user) {
-        session.user.id = token.sub;
+    async jwt({ token, user }) {
+      // Add user data to the token
+      if (user) {
+        token.sub = user.id;
+        token.email = user.email;
+        token.name = user.name;
       }
+      return token;
+    },
+    async session({ session, token }) {
+      // Add token data to the session
+      session.user = {
+        id: token.sub,
+        email: token.email,
+        name: token.name,
+      };
       return session;
     },
   },

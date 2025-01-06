@@ -18,26 +18,31 @@ export default function LoginPage() {
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
-
+  
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-
+  
     try {
-      setIsLoading(true);
-      await signIn("credentials", {
+      const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        redirect: false, // Disables automatic redirection
       });
-      router.push("/admin");
-      router.refresh();
-    } catch {
-      toast.error("Invalid credentials");
+  
+      if (result?.ok) {
+        router.push("/admin"); // Redirect to the desired page
+      } else {
+        toast.error("Invalid credentials");
+      }
+    } catch (error) {
+      console.error("Sign-in error:", error);
+      toast.error("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   }
+  
 
   return (
     <div className="min-h-screen flex flex-col">
