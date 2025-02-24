@@ -1,11 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from "../../auth/config";
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const id = parseInt(params.id, 10);
 
     if (isNaN(id)) {
@@ -15,11 +23,32 @@ export async function DELETE(
       );
     }
 
-    // Delete the transaction from the database
+    // Check if the transaction belongs to the user
+    const transaction = await prisma.transaction.findUnique({
+      where: { id },
+      include: {
+        user: true
+      }
+    });
+
+    if (!transaction) {
+      return NextResponse.json(
+        { error: 'Transaction not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if the transaction belongs to the current user
+    if (transaction.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
+    // Delete the transaction
     await prisma.transaction.delete({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Transaction deleted successfully' });

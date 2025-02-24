@@ -80,6 +80,7 @@ export default function AdminPage() {
     const params = new URLSearchParams();
     params.set('date', transaction.date.toString());
     params.set('buyer', transaction.buyerName);
+    params.set('receiptNumber', transaction.receiptNumber);
     params.set('items', transaction.items.map(item => 
       `${item.quantity}x ${item.name} @ ${currencySymbols[transaction.currency as CurrencyCode]}${Number(item.price).toFixed(2)}`
     ).join(','));

@@ -1,115 +1,70 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import type { Transaction } from "@/types";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { Transaction, formatTransaction } from '@/types';
+import { getServerSession } from 'next-auth';
+import { authOptions } from "../auth/config";
+import { CurrencyCode } from '@/lib/currency';
 
 interface CreateTransactionBody {
   buyerName: string;
-  items: Array<{
-    name: string;
-    price: number;
-    quantity: number;
-  }>;
-  currency: string;
+  itemName: string;
+  price: string;
+  currency?: CurrencyCode;
 }
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    // Parse and validate request body
-    let body: CreateTransactionBody;
-    try {
-      body = await request.json();
-    } catch (e) {
-      console.error('Failed to parse request body:', e);
-      return NextResponse.json({ error: 'Invalid request body format' }, { status: 400 });
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { buyerName, items, currency } = body;
-
-    console.log('Received transaction data:', { buyerName, items, currency }); // Debug log
-
-    // Validate required fields
-    if (!buyerName || typeof buyerName !== 'string') {
-      return NextResponse.json({ error: 'Invalid or missing buyerName' }, { status: 400 });
-    }
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: 'Invalid or missing items array' }, { status: 400 });
-    }
-
-    // Validate each item
-    for (const item of items) {
-      if (!item.name || typeof item.name !== 'string') {
-        return NextResponse.json({ error: 'Invalid or missing item name' }, { status: 400 });
-      }
-      if (typeof item.price !== 'number' || isNaN(item.price) || item.price <= 0) {
-        return NextResponse.json({ error: 'Invalid item price' }, { status: 400 });
-      }
-    }
-
-    // Calculate total
-    const total = items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-
-    console.log('Creating transaction with data:', {
-      buyerName,
-      currency,
-      total,
-      items
-    }); // Debug log
-
-    // Create transaction with items
-    const transaction = await prisma.transaction.create({
-      data: {
-        buyerName,
-        currency,
-        total: Number(total),
-        date: new Date(),
-        items: {
-          create: items.map(item => ({
-            name: item.name,
-            price: Number(item.price),
-            quantity: Number(item.quantity) || 1
-          }))
+    const body: CreateTransactionBody = await req.json();
+    
+    if (body.buyerName && body.itemName && body.price) {
+      const transaction = await prisma.transaction.create({
+        data: {
+          buyerName: body.buyerName,
+          total: parseFloat(body.price),
+          currency: body.currency || "NGN",
+          userId: session.user.id,
+          items: {
+            create: [{
+              name: body.itemName,
+              price: parseFloat(body.price),
+              quantity: 1
+            }]
+          }
+        },
+        include: {
+          items: true
         }
-      },
-      include: {
-        items: true
-      }
-    });
+      });
 
-    const response = {
-      id: transaction.id,
-      buyerName: transaction.buyerName,
-      currency: transaction.currency,
-      date: transaction.date.toString(),
-      total: transaction.total.toString(),
-      items: transaction.items.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price.toString(),
-        quantity: item.quantity
-      }))
-    } as Transaction;
+      return NextResponse.json(formatTransaction(transaction));
+    }
 
-    // Return the formatted response
-    return NextResponse.json(response, {
-      status: 201,
-    });
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
 
   } catch (error: unknown) {
-    console.error('Error creating transaction:', error);
-    
-    return NextResponse.json({
-      error: error instanceof Error ? error.message : 'Failed to create transaction',
-      details: error instanceof Error ? error.stack : undefined
-    }, {
-      status: 500,
-    });
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const transactions = await prisma.transaction.findMany({
+      where: {
+        userId: session.user.id
+      },
       include: {
         items: true
       },
@@ -118,26 +73,11 @@ export async function GET() {
       }
     });
 
-    const formattedTransactions = transactions.map(t => ({
-      id: t.id,
-      buyerName: t.buyerName,
-      currency: t.currency,
-      date: t.date.toString(),
-      total: t.total.toString(),
-      items: t.items.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price.toString(),
-        quantity: item.quantity
-      }))
-    })) as Transaction[];
-
-    return NextResponse.json(formattedTransactions);
+    return NextResponse.json(transactions.map(formatTransaction));
   } catch (error: unknown) {
-    console.error('Error fetching transactions:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch transactions' },
-      { status: 500 }
-    );
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

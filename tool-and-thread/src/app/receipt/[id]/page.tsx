@@ -12,6 +12,7 @@ export default function ReceiptPage() {
   const buyer = searchParams.get("buyer")
   const items = searchParams.get("items")?.split(",")
   const total = searchParams.get("total")
+  const receiptNumber = searchParams.get("receiptNumber")
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return ""
@@ -31,7 +32,7 @@ export default function ReceiptPage() {
     try {
       await navigator.share({
         title: "Tool & Thread Receipt",
-        text: `Receipt for ${buyer} - ${total}`,
+        text: `Receipt #${receiptNumber} for ${buyer} - ${total}`,
         url: window.location.href,
       })
     } catch (error) {
@@ -61,7 +62,7 @@ export default function ReceiptPage() {
       <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg print:shadow-none">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Tool & Thread</h1>
-          <p className="text-gray-600">Receipt</p>
+          <p className="text-gray-600">Receipt #{receiptNumber}</p>
         </div>
 
         <div className="mb-8">

@@ -19,6 +19,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  transactions  Transaction[]
 }
 
 model Account {
@@ -57,19 +58,24 @@ model VerificationToken {
 }
 
 model Transaction {
-  id        Int           @id @default(autoincrement())
-  buyerName String
-  currency  String       @default("USD")
-  date      DateTime     @default(now())
-  items     Item[]       // One-to-many relationship with items
-  total     Float        @default(0)
+  id            Int      @id @default(autoincrement())
+  receiptNumber String   @unique @default(uuid())
+  buyerName     String
+  currency      String   @default("USD")
+  date          DateTime @default(now())
+  items         Item[]
+  total         Float   @default(0)
+  userId        String
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Item {
-  id            Int         @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   name          String
   price         Float
-  quantity      Int         @default(1)
+  quantity      Int      @default(1)
   transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   transactionId Int
 }
