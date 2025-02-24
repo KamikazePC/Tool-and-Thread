@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 
 export default function AdminPage() {
-  const { transactions, isLoading, isDeleting, removeTransaction } = useTransactions();
+  const { transactions, isLoading, isDeleting, removeTransaction, addTransaction } = useTransactions();
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -30,9 +30,7 @@ export default function AdminPage() {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
 
   if (isLoading) {
     return (
@@ -52,34 +50,24 @@ export default function AdminPage() {
     }
   };
 
-  const handleSubmit = async (data: { buyerName: string; items: Array<{ name: string; price: number; quantity: number }>; currency: CurrencyCode }) => {
+  const handleSubmit = async (data: { 
+    buyerName: string; 
+    items: Array<{ name: string; price: number; quantity: number }>; 
+    currency: CurrencyCode; 
+  }) => {
     try {
       setIsSubmitting(true);
-      const response = await fetch('/api/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          buyerName: data.buyerName,
-          items: data.items.map(item => ({
-            name: item.name,
-            price: Number(item.price),
-            quantity: Number(item.quantity)
-          })),
-          currency: data.currency
-        }),
+      addTransaction({
+        buyerName: data.buyerName,
+        items: data.items.map(item => ({
+          name: item.name,
+          price: Number(item.price),
+          quantity: Number(item.quantity)
+        })),
+        currency: data.currency,
       });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create transaction');
-      }
-
-      await response.json();
-      setShowForm(false);
-      window.location.reload();
       toast.success('Transaction created successfully');
+      setShowForm(false);
     } catch (error) {
       console.error('Error creating transaction:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create transaction');
@@ -95,7 +83,10 @@ export default function AdminPage() {
     params.set('items', transaction.items.map(item => 
       `${item.quantity}x ${item.name} @ ${currencySymbols[transaction.currency as CurrencyCode]}${Number(item.price).toFixed(2)}`
     ).join(','));
-    const total = transaction.items.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+    const total = transaction.items.reduce(
+      (sum, item) => sum + (Number(item.price) * item.quantity),
+      0
+    );
     params.set('total', `${currencySymbols[transaction.currency as CurrencyCode]}${total.toFixed(2)}`);
     params.set('currency', transaction.currency);
     return `/receipt/${transaction.id}?${params.toString()}`;
@@ -175,9 +166,7 @@ export default function AdminPage() {
                       <button
                         onClick={() => handleDelete(transaction.id)}
                         disabled={isDeleting === transaction.id}
-                        className={`hover:text-red-600 ${
-                          isDeleting === transaction.id ? "opacity-50" : ""
-                        }`}
+                        className={`hover:text-red-600 ${isDeleting === transaction.id ? "opacity-50" : ""}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
