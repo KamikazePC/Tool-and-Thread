@@ -51,17 +51,17 @@ export default function NewTransactionPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
+      <div className="mb-8">
         <Link href="/admin/transactions">
-          <Button variant="ghost" className="p-0 h-auto text-primary-500 hover:text-primary-600 transition-colors">
+          <Button variant="ghost" className="p-0 h-auto text-primary-500 hover:text-primary-600 transition-colors font-medium">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Transactions
           </Button>
         </Link>
       </div>
       
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-700">New Transaction</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-serif font-bold text-slate-800 tracking-tight">New Transaction</h1>
       </div>
 
       <div className="max-w-3xl mx-auto">

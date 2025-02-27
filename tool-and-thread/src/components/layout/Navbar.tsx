@@ -32,9 +32,9 @@ export default function Navbar() {
   );
 
   return (
-    <nav className="border-b">
+    <nav className="border-b border-slate-200 bg-white shadow-sm">
       <div className="flex h-16 items-center px-4 container mx-auto">
-        <Link href="/admin" className="font-bold text-lg">
+        <Link href="/admin" className="font-serif font-bold text-xl text-slate-800 tracking-tight hover:text-primary-600 transition-colors">
           Tool & Thread
         </Link>
 
@@ -49,14 +49,14 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right">
               <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
+                <SheetTitle className="font-serif text-xl text-slate-800">Menu</SheetTitle>
               </SheetHeader>
               <div className="flex flex-col space-y-4 mt-4">
                 {navItems.map((item) => (
                   <Button
                     key={item.href}
                     variant="ghost"
-                    className="w-full justify-start"
+                    className="w-full justify-start font-medium text-slate-700 hover:text-primary-600"
                     onClick={item.onClick}
                   >
                     <Link href={item.href}>{item.label}</Link>
@@ -69,15 +69,21 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex ml-auto space-x-4">
-          {navItems.map((item) => (
-            <Button
-              key={item.href}
-              variant="ghost"
-              onClick={item.onClick}
-            >
-              <Link href={item.href}>{item.label}</Link>
-            </Button>
-          ))}
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || 
+              (item.href !== "/admin" && pathname?.startsWith(item.href));
+            
+            return (
+              <Button
+                key={item.href}
+                variant="ghost"
+                onClick={item.onClick}
+                className={`font-medium ${isActive ? 'text-primary-600' : 'text-slate-700 hover:text-primary-600'}`}
+              >
+                <Link href={item.href}>{item.label}</Link>
+              </Button>
+            );
+          })}
         </div>
       </div>
     </nav>

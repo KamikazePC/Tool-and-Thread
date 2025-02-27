@@ -75,21 +75,21 @@ export default function TransactionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-700">Transactions</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-serif font-bold text-slate-800 tracking-tight">Transactions</h1>
         <Link href="/admin/transactions/new">
-          <Button className="bg-primary-500 hover:bg-primary-600 text-white transition-colors flex items-center gap-2">
+          <Button className="bg-primary-500 hover:bg-primary-600 text-white font-medium transition-colors flex items-center gap-2">
             <Plus className="h-4 w-4" />
             New Transaction
           </Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {Object.entries(currencyTotals).map(([currency, total]) => (
-          <div key={currency} className={`p-4 rounded-lg shadow-sm border border-slate-200 bg-white`}>
+          <div key={currency} className="p-5 rounded-lg shadow-sm border border-slate-200 bg-white">
             <div className="text-sm font-medium text-slate-500 mb-1">Total in {currency}</div>
-            <div className="text-2xl font-bold text-slate-700">
+            <div className="text-2xl font-bold text-slate-800">
               {currencySymbols[currency as CurrencyCode]}{total.toFixed(2)}
             </div>
           </div>
@@ -131,13 +131,13 @@ export default function TransactionsPage() {
 
                 return (
                   <TableRow key={transaction.id} className="hover:bg-slate-50 transition-colors">
-                    <TableCell className="whitespace-nowrap text-slate-700">
+                    <TableCell className="whitespace-nowrap text-slate-700 font-medium">
                       {format(new Date(transaction.date), "MMM d, yyyy, h:mm a")}
                     </TableCell>
                     <TableCell className="text-slate-700">
                       <span 
                         title={transaction.receiptNumber} 
-                        className="hover:cursor-help"
+                        className="hover:cursor-help font-medium"
                       >
                         {transaction.receiptNumber.substring(0, 8)}...
                       </span>
@@ -145,11 +145,11 @@ export default function TransactionsPage() {
                     <TableCell className="font-medium text-slate-700">{transaction.buyerName}</TableCell>
                     <TableCell className="hidden sm:table-cell text-slate-600">
                       {items.map((item, index) => (
-                        <div key={index}>{item}</div>
+                        <div key={index} className="text-sm">{item}</div>
                       ))}
                     </TableCell>
-                    <TableCell className="text-right font-medium text-slate-700">{formattedTotal}</TableCell>
-                    <TableCell className="text-slate-600">{transaction.currency}</TableCell>
+                    <TableCell className="text-right font-semibold text-slate-800">{formattedTotal}</TableCell>
+                    <TableCell className="text-slate-600 font-medium">{transaction.currency}</TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-2">
                         <Link href={formatReceiptUrl(transaction)}>

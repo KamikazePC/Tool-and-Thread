@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -21,24 +21,144 @@
   
   --color-slate-50: #F8FAFC;
   --color-slate-100: #F0F4F8;
+  --color-slate-200: #E9EFF6;
+  --color-slate-300: #CBD5E0;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
   --color-slate-700: #3E4C59;
+  --color-slate-800: #27272A;
+  --color-slate-900: #0F172A;
   
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  
+  /* Line heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Letter spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
 }
 
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: var(--line-height-normal);
+    color: var(--color-slate-700);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   body {
     @apply bg-slate-50 text-slate-700;
   }
 
+  /* Typography hierarchy */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    line-height: var(--line-height-tight);
+    margin-top: 0;
+    color: var(--color-slate-800);
+  }
+  
+  h1 {
+    font-size: 2.25rem; /* 36px */
+    letter-spacing: var(--letter-spacing-tight);
+    margin-bottom: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.875rem; /* 30px */
+    letter-spacing: var(--letter-spacing-tight);
+    margin-bottom: 1.25rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem; /* 24px */
+    margin-bottom: 1rem;
+  }
+  
+  h4 {
+    font-size: 1.25rem; /* 20px */
+    margin-bottom: 0.75rem;
+  }
+  
+  h5 {
+    font-size: 1.125rem; /* 18px */
+    margin-bottom: 0.5rem;
+  }
+  
+  h6 {
+    font-size: 1rem; /* 16px */
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    margin-bottom: 1rem;
+    line-height: var(--line-height-relaxed);
+  }
+  
+  small, .text-sm {
+    font-size: 0.875rem; /* 14px */
+    line-height: var(--line-height-normal);
+  }
+  
+  .text-xs {
+    font-size: 0.75rem; /* 12px */
+    line-height: var(--line-height-normal);
+  }
+  
+  .text-lg {
+    font-size: 1.125rem; /* 18px */
+    line-height: var(--line-height-relaxed);
+  }
+  
+  .text-xl {
+    font-size: 1.25rem; /* 20px */
+    line-height: var(--line-height-relaxed);
+  }
+  
+  .text-2xl {
+    font-size: 1.5rem; /* 24px */
+    line-height: var(--line-height-tight);
+  }
+  
+  .text-3xl {
+    font-size: 1.875rem; /* 30px */
+    line-height: var(--line-height-tight);
+  }
+  
+  .text-4xl {
+    font-size: 2.25rem; /* 36px */
+    line-height: var(--line-height-tight);
+  }
+  
+  /* Font weights */
+  .font-normal {
+    font-weight: 400;
+  }
+  
+  .font-medium {
+    font-weight: 500;
+  }
+  
+  .font-semibold {
+    font-weight: 600;
+  }
+  
+  .font-bold {
+    font-weight: 700;
   }
 }
 

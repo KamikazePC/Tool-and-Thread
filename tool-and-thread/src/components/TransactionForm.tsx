@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2, Plus } from 'lucide-react';
 import { CurrencyCode, currencySymbols } from '@/lib/currency';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface FormData {
   buyerName: string;
@@ -120,10 +127,10 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
   const formattedTotal = items.reduce((sum, item) => sum + (parsePrice(item.price) * item.quantity), 0);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg border border-slate-200 shadow-sm md:p-8">
-      <div className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-8 bg-white p-6 rounded-lg border border-slate-200 shadow-sm md:p-8">
+      <div className="space-y-6">
         <div>
-          <Label htmlFor="buyerName" className="text-slate-700 font-medium">Customer Name</Label>
+          <Label htmlFor="buyerName" className="text-sm font-semibold text-slate-700 mb-1.5 block">Customer Name</Label>
           <Input
             id="buyerName"
             value={buyerName}
@@ -132,30 +139,53 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
             required
           />
           {errors.buyerName && (
-            <p className="text-sm text-error mt-1">{errors.buyerName}</p>
+            <p className="text-sm text-error mt-1.5 font-medium">{errors.buyerName}</p>
           )}
         </div>
 
-        <div className="space-y-4">
-          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-[1fr,1fr,auto,auto] sm:gap-4 items-end bg-slate-50 p-4 rounded-md">
+        <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-[1fr,1fr,auto,auto] sm:gap-4 items-end bg-slate-50 p-5 rounded-md">
             <div>
-              <Label className="text-slate-700 font-medium">Currency</Label>
-              <select 
-                value={currency} 
-                onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
-                className="w-full mt-1 px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-400 focus:border-primary-400"
-              >
-                <option value="USD">US Dollar ($)</option>
-                <option value="GBP">British Pound (£)</option>
-                <option value="NGN">Nigerian Naira (₦)</option>
-              </select>
+              <Label className="text-sm font-semibold text-slate-700 mb-1.5 block">Currency</Label>
+              <Select value={currency} onValueChange={(value) => setCurrency(value as CurrencyCode)}>
+                <SelectTrigger className="w-full mt-1 border-slate-300 focus:border-primary-400 focus:ring-primary-400 text-slate-700">
+                  <SelectValue>
+                    {currency && (
+                      <span className="flex items-center">
+                        <span className="mr-2 text-primary-500 font-semibold">{currencySymbols[currency]}</span>
+                        {currency === "USD" ? "US Dollar" : currency === "GBP" ? "British Pound" : "Nigerian Naira"}
+                      </span>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USD" className="font-medium">
+                    <span className="flex items-center">
+                      <span className="mr-2 text-primary-500 font-semibold">$</span>
+                      US Dollar
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="GBP" className="font-medium">
+                    <span className="flex items-center">
+                      <span className="mr-2 text-primary-500 font-semibold">£</span>
+                      British Pound
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="NGN" className="font-medium">
+                    <span className="flex items-center">
+                      <span className="mr-2 text-primary-500 font-semibold">₦</span>
+                      Nigerian Naira
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           {items.map((item, index) => (
-            <div key={index} className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-[1fr,1fr,auto,auto] sm:gap-4 items-end bg-slate-50 p-4 rounded-md">
+            <div key={index} className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-[1fr,1fr,auto,auto] sm:gap-4 items-end bg-slate-50 p-5 rounded-md">
               <div>
-                <Label htmlFor={`item-name-${index}`} className="text-slate-700 font-medium">Item Name</Label>
+                <Label htmlFor={`item-name-${index}`} className="text-sm font-semibold text-slate-700 mb-1.5 block">Item Name</Label>
                 <Input
                   id={`item-name-${index}`}
                   value={item.name}
@@ -164,14 +194,14 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
                   required
                 />
                 {errors.items?.[index]?.name && (
-                  <p className="text-error text-sm mt-1">{errors.items[index].name}</p>
+                  <p className="text-error text-sm mt-1.5 font-medium">{errors.items[index].name}</p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor={`item-price-${index}`} className="text-slate-700 font-medium">Price</Label>
+                <Label htmlFor={`item-price-${index}`} className="text-sm font-semibold text-slate-700 mb-1.5 block">Price</Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium">
                     {currencySymbols[currency]}
                   </span>
                   <Input
@@ -185,12 +215,12 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
                   />
                 </div>
                 {errors.items?.[index]?.price && (
-                  <p className="text-error text-sm mt-1">{errors.items[index].price}</p>
+                  <p className="text-error text-sm mt-1.5 font-medium">{errors.items[index].price}</p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor={`item-quantity-${index}`} className="text-slate-700 font-medium">Quantity</Label>
+                <Label htmlFor={`item-quantity-${index}`} className="text-sm font-semibold text-slate-700 mb-1.5 block">Quantity</Label>
                 <Input
                   id={`item-quantity-${index}`}
                   type="number"
@@ -200,7 +230,7 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
                   className={`border-slate-300 focus:border-primary-400 focus:ring-primary-400 ${errors.items?.[index]?.quantity ? 'border-error' : ''}`}
                 />
                 {errors.items?.[index]?.quantity && (
-                  <p className="text-error text-sm mt-1">{errors.items[index].quantity}</p>
+                  <p className="text-error text-sm mt-1.5 font-medium">{errors.items[index].quantity}</p>
                 )}
               </div>
 
@@ -223,26 +253,26 @@ export default function TransactionForm({ onSubmit, isSubmitting = false, onCanc
           type="button"
           variant="outline"
           onClick={addItem}
-          className="w-full border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
+          className="w-full border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors font-medium"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Item
         </Button>
       </div>
 
-      <div className="flex justify-between items-center">
-        <div className="text-lg font-semibold text-slate-700">
+      <div className="flex justify-between items-center pt-4 border-t border-slate-200">
+        <div className="text-lg font-semibold text-slate-800 font-serif">
           Total: <span className="text-primary-600">{currencySymbols[currency]}{formattedTotal.toFixed(2)}</span>
         </div>
       </div>
 
       <div className="flex justify-end gap-4">
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel} className="border-slate-300 text-slate-700 hover:bg-slate-50">
+          <Button type="button" variant="outline" onClick={onCancel} className="border-slate-300 text-slate-700 hover:bg-slate-50 font-medium">
             Cancel
           </Button>
         )}
-        <Button type="submit" disabled={isSubmitting} className="bg-primary-500 hover:bg-primary-600 text-white transition-colors">
+        <Button type="submit" disabled={isSubmitting} className="bg-primary-500 hover:bg-primary-600 text-white transition-colors font-medium">
           {isSubmitting ? 'Creating...' : 'Create Transaction'}
         </Button>
       </div>
