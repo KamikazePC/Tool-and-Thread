@@ -64,91 +64,116 @@ export default function TransactionsPage() {
     return `/receipt/${transaction.id}?${params.toString()}`;
   };
 
+  const currencyTotals = transactions.reduce((acc, transaction) => {
+    const total = transaction.items.reduce(
+      (sum, item) => sum + (Number(item.price) * item.quantity),
+      0
+    );
+    acc[transaction.currency as CurrencyCode] = (acc[transaction.currency as CurrencyCode] || 0) + total;
+    return acc;
+  }, {} as Record<CurrencyCode, number>);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">All Transactions</h1>
+        <h1 className="text-2xl font-bold text-slate-700">Transactions</h1>
         <Link href="/admin/transactions/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" /> New Transaction
+          <Button className="bg-primary-500 hover:bg-primary-600 text-white transition-colors flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            New Transaction
           </Button>
         </Link>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[180px]">Date</TableHead>
-              <TableHead>Receipt #</TableHead>
-              <TableHead>Buyer</TableHead>
-              <TableHead className="hidden sm:table-cell">Items</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-              <TableHead>Currency</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {transactions.map((transaction) => {
-              const formatPrice = (price: string | number) => {
-                const numericPrice = parsePrice(price);
-                const symbol = currencySymbols[transaction.currency as CurrencyCode];
-                return `${symbol}${numericPrice.toFixed(2)}`;
-              };
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {Object.entries(currencyTotals).map(([currency, total]) => (
+          <div key={currency} className={`p-4 rounded-lg shadow-sm border border-slate-200 bg-white`}>
+            <div className="text-sm font-medium text-slate-500 mb-1">Total in {currency}</div>
+            <div className="text-2xl font-bold text-slate-700">
+              {currencySymbols[currency as CurrencyCode]}{total.toFixed(2)}
+            </div>
+          </div>
+        ))}
+      </div>
 
-              const items = transaction.items.map(
-                (item) => `${item.quantity}x ${item.name} @ ${formatPrice(item.price)}`
-              );
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-slate-50">
+              <TableRow>
+                <TableHead className="w-[180px] text-slate-600">Date</TableHead>
+                <TableHead className="text-slate-600">Receipt #</TableHead>
+                <TableHead className="text-slate-600">Buyer</TableHead>
+                <TableHead className="hidden sm:table-cell text-slate-600">Items</TableHead>
+                <TableHead className="text-right text-slate-600">Total</TableHead>
+                <TableHead className="text-slate-600">Currency</TableHead>
+                <TableHead className="w-[100px] text-slate-600">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions.map((transaction) => {
+                const formatPrice = (price: string | number) => {
+                  const numericPrice = parsePrice(price);
+                  const symbol = currencySymbols[transaction.currency as CurrencyCode];
+                  return `${symbol}${numericPrice.toFixed(2)}`;
+                };
 
-              const total = transaction.items.reduce(
-                (sum, item) => sum + (Number(item.price) * item.quantity),
-                0
-              );
+                const items = transaction.items.map(
+                  (item) => `${item.quantity}x ${item.name} @ ${formatPrice(item.price)}`
+                );
 
-              const formattedTotal = formatPrice(total);
+                const total = transaction.items.reduce(
+                  (sum, item) => sum + (Number(item.price) * item.quantity),
+                  0
+                );
 
-              return (
-                <TableRow key={transaction.id}>
-                  <TableCell className="whitespace-nowrap">
-                    {format(new Date(transaction.date), "MMM d, yyyy, h:mm a")}
-                  </TableCell>
-                  <TableCell>
-                    {transaction.receiptNumber}
-                  </TableCell>
-                  <TableCell>{transaction.buyerName}</TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    {items.map((item, index) => (
-                      <div key={index}>{item}</div>
-                    ))}
-                  </TableCell>
-                  <TableCell className="text-right whitespace-nowrap">
-                    {formattedTotal}
-                  </TableCell>
-                  <TableCell>
-                    {transaction.currency}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Link
-                        href={formatReceiptUrl(transaction)}
-                        className="hover:text-primary"
+                const formattedTotal = formatPrice(total);
+
+                return (
+                  <TableRow key={transaction.id} className="hover:bg-slate-50 transition-colors">
+                    <TableCell className="whitespace-nowrap text-slate-700">
+                      {format(new Date(transaction.date), "MMM d, yyyy, h:mm a")}
+                    </TableCell>
+                    <TableCell className="text-slate-700">
+                      <span 
+                        title={transaction.receiptNumber} 
+                        className="hover:cursor-help"
                       >
-                        <Download className="h-4 w-4" />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(transaction.id)}
-                        disabled={isDeleting === transaction.id}
-                        className={`hover:text-red-600 ${isDeleting === transaction.id ? "opacity-50" : ""}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                        {transaction.receiptNumber.substring(0, 8)}...
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-medium text-slate-700">{transaction.buyerName}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-slate-600">
+                      {items.map((item, index) => (
+                        <div key={index}>{item}</div>
+                      ))}
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-slate-700">{formattedTotal}</TableCell>
+                    <TableCell className="text-slate-600">{transaction.currency}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <Link href={formatReceiptUrl(transaction)}>
+                          <Button variant="ghost" size="icon" className="text-primary-500 hover:text-primary-600 hover:bg-primary-50">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(transaction.id)}
+                          disabled={isDeleting === transaction.id}
+                          className="text-error hover:text-white hover:bg-error"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

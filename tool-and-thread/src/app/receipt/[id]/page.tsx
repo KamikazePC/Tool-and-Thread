@@ -1,13 +1,13 @@
 "use client"
 
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { Share2, Printer, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 
 export default function ReceiptPage() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const date = searchParams.get("date")
   const buyer = searchParams.get("buyer")
   const items = searchParams.get("items")?.split(",")
@@ -17,7 +17,7 @@ export default function ReceiptPage() {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return ""
     try {
-      return format(new Date(dateString), "EEEE, MMMM d, yyyy")
+      return format(new Date(dateString), "MMMM d, yyyy")
     } catch (error) {
       console.error("Error formatting date:", error)
       return dateString
@@ -40,79 +40,81 @@ export default function ReceiptPage() {
     }
   }
 
-  const handleBack = () => {
-    router.back()
-  }
-
   return (
-    <div className="min-h-screen">
-      {/* Back button - hidden in print */}
-      <div className="print:hidden max-w-2xl mx-auto p-8">
-        <Button
-          variant="ghost"
-          onClick={handleBack}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Transactions
-        </Button>
+    <div className="container mx-auto px-4 py-8 max-w-3xl">
+      {/* Print/Share Controls - Hidden when printing */}
+      <div className="print:hidden mb-6 flex justify-between items-center">
+        <Link href="/admin/transactions">
+          <Button variant="ghost" className="p-0 h-auto text-primary-500 hover:text-primary-600 transition-colors">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Transactions
+          </Button>
+        </Link>
+        <div className="flex gap-2">
+          <Button onClick={handlePrint} className="bg-primary-500 hover:bg-primary-600 text-white transition-colors">
+            <Printer className="h-4 w-4 mr-2" />
+            Print Receipt
+          </Button>
+          <Button onClick={handleShare} className="bg-accent-500 hover:bg-accent-600 text-slate-800 transition-colors">
+            <Share2 className="h-4 w-4 mr-2" />
+            Share
+          </Button>
+        </div>
       </div>
 
-      {/* Receipt content */}
-      <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg print:shadow-none">
+      {/* Receipt */}
+      <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-200 print:shadow-none print:border-none">
+        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Tool & Thread</h1>
-          <p className="text-lg font-semibold text-gray-800">Receipt #{receiptNumber}</p>
+          <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-primary-50 flex items-center justify-center">
+            <span className="text-2xl font-bold text-primary-500">T&T</span>
+          </div>
+          <h1 className="text-3xl font-bold mb-1 text-slate-800">Tool & Thread</h1>
+          <div className="inline-block px-4 py-1 rounded-full bg-primary-50 text-primary-700 font-medium">
+            Receipt #{receiptNumber}
+          </div>
         </div>
 
+        {/* Transaction Details */}
         <div className="mb-8">
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-600">Date:</span>
-            <span>{formatDate(date)}</span>
-          </div>
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-600">Receipt Number:</span>
-            <span className="font-medium">{receiptNumber}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Customer:</span>
-            <span>{buyer}</span>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h2 className="text-sm font-medium text-slate-500 mb-1">Date</h2>
+              <p className="text-slate-700">{formatDate(date)}</p>
+            </div>
+            <div className="text-right">
+              <h2 className="text-sm font-medium text-slate-500 mb-1">Customer</h2>
+              <p className="text-slate-700">{buyer}</p>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-b py-4 mb-8">
-          <div className="font-medium mb-4">Items:</div>
-          <div className="space-y-2">
+        {/* Items */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-4 text-slate-700 border-b border-slate-200 pb-2">Items</h2>
+          <div className="space-y-4">
             {items?.map((item, index) => (
               <div key={index} className="flex justify-between">
-                <span>{item}</span>
+                <div>
+                  <p className="font-medium text-slate-700">{item}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex justify-between font-bold text-lg mb-8">
-          <span>Total:</span>
-          <span>{total}</span>
+        {/* Total */}
+        <div className="border-t border-slate-200 pt-4">
+          <div className="flex justify-between items-center">
+            <p className="text-lg font-semibold text-slate-700">Total</p>
+            <p className="text-xl font-bold text-primary-600">{total}</p>
+          </div>
         </div>
 
-        {/* Action buttons - hidden in print */}
-        <div className="print:hidden flex justify-end space-x-4">
-          <Button
-            variant="outline"
-            onClick={handleShare}
-            className="flex items-center"
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
-          <Button
-            onClick={handlePrint}
-            className="flex items-center"
-          >
-            <Printer className="h-4 w-4 mr-2" />
-            Print
-          </Button>
+        {/* Footer */}
+        <div className="mt-12 text-center text-slate-500 text-sm">
+          <p>Thank you for your business!</p>
+          <p className="mt-1">For questions or concerns, please contact us.</p>
         </div>
       </div>
     </div>

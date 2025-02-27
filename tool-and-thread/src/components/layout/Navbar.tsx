@@ -34,7 +34,7 @@ export default function Navbar() {
   return (
     <nav className="border-b">
       <div className="flex h-16 items-center px-4 container mx-auto">
-        <Link href="/" className="font-bold text-lg">
+        <Link href="/admin" className="font-bold text-lg">
           Tool & Thread
         </Link>
 
