@@ -44,6 +44,7 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         const error = await response.json();
+        toast.error(error.message || "Failed to register");
         throw new Error(error.message || "Failed to register");
       }
 
