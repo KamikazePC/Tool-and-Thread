@@ -62,13 +62,17 @@ export default function ReceiptPage() {
       <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg print:shadow-none">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Tool & Thread</h1>
-          <p className="text-gray-600">Receipt #{receiptNumber}</p>
+          <p className="text-lg font-semibold text-gray-800">Receipt #{receiptNumber}</p>
         </div>
 
         <div className="mb-8">
           <div className="flex justify-between mb-2">
             <span className="text-gray-600">Date:</span>
             <span>{formatDate(date)}</span>
+          </div>
+          <div className="flex justify-between mb-2">
+            <span className="text-gray-600">Receipt Number:</span>
+            <span className="font-medium">{receiptNumber}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">Customer:</span>

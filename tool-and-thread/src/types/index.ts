@@ -23,7 +23,8 @@ export interface Transaction {
 export function formatTransaction(transaction: PrismaTransaction & { items: PrismaItem[] }): Transaction {
   return {
     id: transaction.id,
-    receiptNumber: transaction.receiptNumber,
+    // Use a default receipt number if missing
+    receiptNumber: (transaction as any).receiptNumber || `RCPT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     buyerName: transaction.buyerName,
     date: transaction.date.toISOString(),
     total: transaction.total.toString(),

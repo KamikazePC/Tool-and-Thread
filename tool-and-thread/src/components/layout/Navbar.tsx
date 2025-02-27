@@ -18,7 +18,9 @@ export default function Navbar() {
   const { data: session } = useSession();
 
   const navItems = session ? [
-    { href: "/admin", label: "Admin" },
+    { href: "/admin", label: "Dashboard" },
+    { href: "/admin/transactions", label: "Transactions" },
+    { href: "/admin/transactions/new", label: "New Transaction" },
     { href: "/settings", label: "Settings" },
     {
       href: "#",
