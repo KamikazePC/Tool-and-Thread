@@ -47,7 +47,7 @@ export default function Navbar() {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
+            <SheetContent side="left" className="bg-white">
               <SheetHeader>
                 <SheetTitle className="font-serif text-xl text-slate-800">Menu</SheetTitle>
               </SheetHeader>
