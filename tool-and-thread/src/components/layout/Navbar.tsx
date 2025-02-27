@@ -32,60 +32,67 @@ export default function Navbar() {
   );
 
   return (
-    <nav className="border-b border-slate-200 bg-white shadow-sm">
-      <div className="flex h-16 items-center px-4 container mx-auto">
-        <Link href="/admin" className="font-serif font-bold text-xl text-slate-800 tracking-tight hover:text-primary-600 transition-colors">
-          Tool & Thread
-        </Link>
-
-        {/* Mobile Menu */}
-        {navItems.length > 0 && (
-          <Sheet>
-            <SheetTrigger asChild className="md:hidden ml-auto">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="bg-white">
-              <SheetHeader>
-                <SheetTitle className="font-serif text-xl text-slate-800">Menu</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col space-y-4 mt-4">
-                {navItems.map((item) => (
-                  <Button
-                    key={item.href}
-                    variant="ghost"
-                    className="w-full justify-start font-medium text-slate-700 hover:text-primary-600"
-                    onClick={item.onClick}
-                  >
-                    <Link href={item.href}>{item.label}</Link>
-                  </Button>
-                ))}
+    <header className="border-b border-slate-200 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center">
+              <div className="mr-2 h-8 w-8 rounded-full bg-primary-50 flex items-center justify-center">
+                <span className="text-sm font-bold text-primary-500 font-serif">T&T</span>
               </div>
-            </SheetContent>
-          </Sheet>
-        )}
+              <span className="text-xl font-bold text-slate-800 font-serif tracking-tight">Tool & Thread</span>
+            </Link>
+          </div>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex ml-auto space-x-4">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || 
-              (item.href !== "/admin" && pathname?.startsWith(item.href));
-            
-            return (
-              <Button
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-4">
+            {navItems.map((item) => (
+              <Link
                 key={item.href}
-                variant="ghost"
+                href={item.href}
                 onClick={item.onClick}
-                className={`font-medium ${isActive ? 'text-primary-600' : 'text-slate-700 hover:text-primary-600'}`}
+                className="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:text-primary-600 hover:bg-slate-50 transition-colors"
               >
-                <Link href={item.href}>{item.label}</Link>
-              </Button>
-            );
-          })}
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Mobile Navigation */}
+          {navItems.length > 0 && (
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className="h-12 w-12 rounded-md">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="bg-white">
+                <SheetHeader>
+                  <SheetTitle className="font-serif text-xl text-slate-800">Menu</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col space-y-1 mt-6">
+                  {navItems.map((item) => (
+                    <Link 
+                      key={item.href} 
+                      href={item.href}
+                      className="w-full"
+                      onClick={item.onClick}
+                    >
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start font-medium text-slate-700 hover:text-primary-600 hover:bg-slate-50 h-14 text-base px-4"
+                      >
+                        {item.label}
+                      </Button>
+                    </Link>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

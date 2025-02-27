@@ -171,11 +171,11 @@ export default function TransactionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-serif font-bold text-slate-800 tracking-tight">Transactions</h1>
-        <Link href="/admin/transactions/new">
-          <Button className="bg-primary-500 hover:bg-primary-600 text-white font-medium transition-colors flex items-center gap-2">
-            <Plus className="h-4 w-4" />
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+        <h1 className="text-3xl font-serif font-bold text-slate-800 tracking-tight text-center sm:text-left">Transactions</h1>
+        <Link href="/admin/transactions/new" className="w-full sm:w-auto">
+          <Button className="bg-primary-500 hover:bg-primary-600 text-white font-medium transition-colors flex items-center gap-2 h-12 w-full sm:w-auto justify-center">
+            <Plus className="h-5 w-5" />
             New Transaction
           </Button>
         </Link>
@@ -315,7 +315,8 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+      {/* Desktop Table View (hidden on mobile) */}
+      <div className="hidden sm:block bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-slate-50">
@@ -323,7 +324,7 @@ export default function TransactionsPage() {
                 <TableHead className="w-[180px] text-slate-600">Date</TableHead>
                 <TableHead className="text-slate-600">Receipt #</TableHead>
                 <TableHead className="text-slate-600">Buyer</TableHead>
-                <TableHead className="hidden sm:table-cell text-slate-600">Items</TableHead>
+                <TableHead className="text-slate-600">Items</TableHead>
                 <TableHead className="text-right text-slate-600">Total</TableHead>
                 <TableHead className="text-slate-600">Currency</TableHead>
                 <TableHead className="w-[100px] text-slate-600">Actions</TableHead>
@@ -337,10 +338,6 @@ export default function TransactionsPage() {
                     const symbol = currencySymbols[transaction.currency as CurrencyCode];
                     return `${symbol}${numericPrice.toFixed(2)}`;
                   };
-
-                  const items = transaction.items.map(
-                    (item) => `${item.quantity}x ${item.name} @ ${formatPrice(item.price)}`
-                  );
 
                   const total = transaction.items.reduce(
                     (sum, item) => sum + (Number(item.price) * item.quantity),
@@ -363,9 +360,9 @@ export default function TransactionsPage() {
                         </span>
                       </TableCell>
                       <TableCell className="font-medium text-slate-700">{transaction.buyerName}</TableCell>
-                      <TableCell className="hidden sm:table-cell text-slate-600">
-                        {items.map((item, index) => (
-                          <div key={index} className="text-sm">{item}</div>
+                      <TableCell className="text-slate-600">
+                        {transaction.items.map((item, index) => (
+                          <div key={index} className="text-sm">{item.quantity}x {item.name} ({formatPrice(item.price)})</div>
                         ))}
                       </TableCell>
                       <TableCell className="text-right font-semibold text-slate-800">{formattedTotal}</TableCell>
@@ -373,7 +370,7 @@ export default function TransactionsPage() {
                       <TableCell>
                         <div className="flex justify-end gap-2">
                           <Link href={formatReceiptUrl(transaction)}>
-                            <Button variant="ghost" size="icon" className="text-primary-500 hover:text-primary-600 hover:bg-primary-50">
+                            <Button variant="ghost" size="icon" className="text-primary-500 hover:text-primary-600 hover:bg-primary-50 h-10 w-10 min-w-10">
                               <Download className="h-4 w-4" />
                             </Button>
                           </Link>
@@ -382,7 +379,7 @@ export default function TransactionsPage() {
                             size="icon"
                             onClick={() => handleDelete(transaction.id)}
                             disabled={isDeleting === transaction.id}
-                            className="text-error hover:text-white hover:bg-error"
+                            className="text-error hover:text-white hover:bg-error h-10 w-10 min-w-10"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -412,6 +409,107 @@ export default function TransactionsPage() {
             </TableBody>
           </Table>
         </div>
+      </div>
+
+      {/* Mobile Card View (shown only on mobile) */}
+      <div className="sm:hidden space-y-4">
+        {filteredTransactions.length > 0 ? (
+          filteredTransactions.map((transaction) => {
+            const formatPrice = (price: string | number) => {
+              const numericPrice = parsePrice(price);
+              const symbol = currencySymbols[transaction.currency as CurrencyCode];
+              return `${symbol}${numericPrice.toFixed(2)}`;
+            };
+
+            const total = transaction.items.reduce(
+              (sum, item) => sum + (Number(item.price) * item.quantity),
+              0
+            );
+
+            const formattedTotal = formatPrice(total);
+
+            return (
+              <div 
+                key={transaction.id} 
+                className="bg-white rounded-lg shadow-sm border border-slate-200 p-4"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-medium text-slate-800">{transaction.buyerName}</h3>
+                    <p className="text-sm text-slate-500">
+                      {format(new Date(transaction.date), "MMM d, yyyy")}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold text-slate-800">{formattedTotal}</div>
+                    <div className="text-sm text-slate-500">{transaction.currency}</div>
+                  </div>
+                </div>
+                
+                <div className="border-t border-slate-100 pt-3 mb-3">
+                  <div className="text-sm text-slate-500 mb-1">Receipt</div>
+                  <div className="font-medium text-slate-700 text-sm">
+                    {transaction.receiptNumber.substring(0, 12)}...
+                  </div>
+                </div>
+                
+                <div className="border-t border-slate-100 pt-3 mb-3">
+                  <div className="text-sm text-slate-500 mb-1">Items</div>
+                  <div className="space-y-1">
+                    {transaction.items.map((item, index) => (
+                      <div key={index} className="text-sm text-slate-700">
+                        {item.quantity}x {item.name} ({formatPrice(item.price)})
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="border-t border-slate-100 pt-3 flex justify-between">
+                  <div className="text-xs text-slate-500">
+                    {format(new Date(transaction.date), "h:mm a")}
+                  </div>
+                  <div className="flex gap-1">
+                    <Link href={formatReceiptUrl(transaction)}>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-10 w-10 min-w-10 rounded-full text-primary-500 hover:text-primary-600 hover:bg-primary-50"
+                      >
+                        <Download className="h-4 w-4" />
+                        <span className="sr-only">Download Receipt</span>
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(transaction.id)}
+                      disabled={isDeleting === transaction.id}
+                      className="h-10 w-10 min-w-10 rounded-full text-error hover:text-white hover:bg-error"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete Transaction</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 text-center text-slate-500">
+            No transactions found matching your filters.
+            {hasActiveFilters && (
+              <div className="mt-2">
+                <Button 
+                  variant="link" 
+                  onClick={resetFilters}
+                  className="text-primary-500 font-medium"
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

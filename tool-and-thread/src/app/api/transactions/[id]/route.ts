@@ -4,8 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from "../../auth/config";
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,7 +13,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const id = parseInt(params.id, 10);
+    const { searchParams } = new URL(_request.url);
+    const id = parseInt(searchParams.get('id') || '');
 
     if (isNaN(id)) {
       return NextResponse.json(

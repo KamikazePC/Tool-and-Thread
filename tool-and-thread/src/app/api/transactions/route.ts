@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Transaction, formatTransaction } from '@/types';
+import { formatTransaction } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "../auth/config";
 import { CurrencyCode } from '@/lib/currency';
-import { Prisma } from '@prisma/client';
 
 // Updated to match the structure being sent from useTransactions
 interface CreateTransactionBody {

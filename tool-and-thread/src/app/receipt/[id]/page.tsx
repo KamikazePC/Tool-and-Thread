@@ -24,6 +24,16 @@ export default function ReceiptPage() {
     }
   }
 
+  const formatTime = (dateString: string | null) => {
+    if (!dateString) return ""
+    try {
+      return format(new Date(dateString), "h:mm a")
+    } catch (error) {
+      console.error("Error formatting time:", error)
+      return ""
+    }
+  }
+
   const handlePrint = () => {
     window.print()
   }
@@ -43,47 +53,53 @@ export default function ReceiptPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       {/* Print/Share Controls - Hidden when printing */}
-      <div className="print:hidden mb-8 flex justify-between items-center">
+      <div className="print:hidden mb-8 flex flex-col sm:flex-row gap-4 sm:gap-0 sm:justify-between sm:items-center">
         <Link href="/admin/transactions">
           <Button variant="ghost" className="p-0 h-auto text-primary-500 hover:text-primary-600 transition-colors font-medium">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Transactions
           </Button>
         </Link>
         <div className="flex gap-3">
-          <Button onClick={handlePrint} className="bg-primary-500 hover:bg-primary-600 text-white transition-colors font-medium">
-            <Printer className="h-4 w-4 mr-2" />
+          <Button 
+            onClick={handlePrint} 
+            className="bg-primary-500 hover:bg-primary-600 text-white transition-colors font-medium flex-1 sm:flex-initial h-12 px-5"
+          >
+            <Printer className="h-5 w-5 mr-2" />
             Print Receipt
           </Button>
-          <Button onClick={handleShare} className="bg-accent-500 hover:bg-accent-600 text-slate-800 transition-colors font-medium">
-            <Share2 className="h-4 w-4 mr-2" />
+          <Button 
+            onClick={handleShare} 
+            className="bg-accent-500 hover:bg-accent-600 text-slate-800 transition-colors font-medium flex-1 sm:flex-initial h-12 px-5"
+          >
+            <Share2 className="h-5 w-5 mr-2" />
             Share
           </Button>
         </div>
       </div>
 
       {/* Receipt */}
-      <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-200 print:shadow-none print:border-none">
+      <div className="bg-white p-5 sm:p-8 rounded-lg shadow-sm border border-slate-200 print:shadow-none print:border-none">
         {/* Header */}
         <div className="text-center mb-10">
           <div className="w-24 h-24 mx-auto mb-5 rounded-full bg-primary-50 flex items-center justify-center">
             <span className="text-2xl font-bold text-primary-500 font-serif">T&T</span>
           </div>
           <h1 className="text-3xl font-bold mb-2 text-slate-800 font-serif tracking-tight">Tool & Thread</h1>
-          <div className="inline-block px-4 py-1 rounded-full bg-primary-50 text-primary-700 font-medium text-sm">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 font-medium text-sm">
             Receipt #{receiptNumber}
           </div>
         </div>
 
         {/* Transaction Details */}
         <div className="mb-10">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-4">
             <div>
               <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Date</h2>
               <p className="text-slate-800 font-medium">{formatDate(date)}</p>
-              <p className="text-slate-700">{format(new Date(date || ""), "h:mm a")}</p>
+              <p className="text-slate-700">{formatTime(date)}</p>
             </div>
-            <div className="text-right">
+            <div className="sm:text-right">
               <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Customer</h2>
               <p className="text-slate-800 font-medium">{buyer}</p>
             </div>

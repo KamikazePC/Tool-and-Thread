@@ -24,7 +24,7 @@ export function formatTransaction(transaction: PrismaTransaction & { items: Pris
   return {
     id: transaction.id,
     // Use a default receipt number if missing
-    receiptNumber: (transaction as any).receiptNumber || `RCPT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    receiptNumber: (transaction as { receiptNumber?: string }).receiptNumber || `RCPT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     buyerName: transaction.buyerName,
     date: transaction.date.toISOString(),
     total: transaction.total.toString(),

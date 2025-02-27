@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
         data: {
           buyerName: body.buyerName,
           total: body.price.toString(),
+          userId: "default-user",
           items: {
             create: [{
               name: body.itemName,
