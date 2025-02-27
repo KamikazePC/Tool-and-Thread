@@ -35,18 +35,63 @@ export default function ReceiptPage() {
   }
 
   const handlePrint = () => {
-    window.print()
+    // For mobile devices, offer PDF download
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      // Use html2canvas and jsPDF for mobile PDF generation
+      import('html2canvas').then(html2canvasModule => {
+        const html2canvas = html2canvasModule.default;
+        import('jspdf').then(jsPDFModule => {
+          const jsPDF = jsPDFModule.default;
+          
+          const receiptElement = document.querySelector('.bg-white') as HTMLElement;
+          if (!receiptElement) return;
+          
+          html2canvas(receiptElement, {
+            scale: 2, // Higher quality
+            useCORS: true,
+            logging: false
+          }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+              orientation: 'portrait',
+              unit: 'mm',
+              format: 'a4'
+            });
+            
+            // Calculate dimensions to fit the receipt on the PDF
+            const imgWidth = 210; // A4 width in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`Tool_Thread_Receipt_${receiptNumber || 'download'}.pdf`);
+          });
+        });
+      });
+    } else {
+      // Use standard print for desktop
+      window.print();
+    }
   }
 
   const handleShare = async () => {
     try {
-      await navigator.share({
-        title: "Tool & Thread Receipt",
-        text: `Receipt #${receiptNumber} for ${buyer} - ${total}`,
-        url: window.location.href,
-      })
+      // Check if the Web Share API is supported
+      if (navigator.share) {
+        await navigator.share({
+          title: "Tool & Thread Receipt",
+          text: `Receipt #${receiptNumber} for ${buyer} - ${total}`,
+          url: window.location.href,
+        })
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        // Copy the URL to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        alert("Receipt link copied to clipboard!");
+      }
     } catch (error) {
       console.error("Error sharing:", error)
+      // Additional fallback if clipboard API fails
+      prompt("Copy this link to share your receipt:", window.location.href);
     }
   }
 
@@ -66,7 +111,11 @@ export default function ReceiptPage() {
             className="bg-primary-500 hover:bg-primary-600 text-white transition-colors font-medium flex-1 sm:flex-initial h-12 px-5"
           >
             <Printer className="h-5 w-5 mr-2" />
-            Print Receipt
+            {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+              typeof navigator !== 'undefined' ? navigator.userAgent : ''
+            ) 
+              ? "Download PDF" 
+              : "Print Receipt"}
           </Button>
           <Button 
             onClick={handleShare} 
