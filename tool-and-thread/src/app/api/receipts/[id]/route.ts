@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateReceipt } from '@/lib/generatePDF';
-import { CurrencyCode } from '@/lib/currency';
-import type { Transaction } from '@/types';
 import { formatTransaction } from '@/types';
 
 export const runtime = 'nodejs';
