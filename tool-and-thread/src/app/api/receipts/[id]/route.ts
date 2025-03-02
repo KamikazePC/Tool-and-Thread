@@ -3,16 +3,22 @@ import { prisma } from '@/lib/prisma';
 import { generateReceipt } from '@/lib/generatePDF';
 import { CurrencyCode } from '@/lib/currency';
 import type { Transaction } from '@/types';
+import { formatTransaction } from '@/types';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {
-    // Extract 'id' from the request URL
-    const { searchParams } = new URL(request.url);
-    const id = parseInt(searchParams.get('id') || '');
-
+    // Extract 'id' from the URL path instead of search parameters
+    const pathname = request.nextUrl.pathname;
+    const idMatch = pathname.match(/\/api\/receipts\/(\d+)$/);
+    const idString = idMatch ? idMatch[1] : '';
+    const id = parseInt(idString);
+    
+    console.log('Processing receipt request for transaction ID:', id);
+    
     if (isNaN(id)) {
+      console.error('Invalid transaction ID from path:', pathname);
       return NextResponse.json(
         { error: 'Invalid transaction ID' },
         { status: 400 }
@@ -27,31 +33,27 @@ export async function GET(request: NextRequest) {
     });
 
     if (!dbTransaction) {
+      console.error('Transaction not found in database for ID:', id);
       return NextResponse.json(
         { error: 'Transaction not found' },
         { status: 404 }
       );
     }
 
-    const transaction: Transaction = {
-      ...dbTransaction,
-      date: dbTransaction.date.toISOString(),
-      total: dbTransaction.total.toString(),
-      currency: dbTransaction.currency as CurrencyCode,
-      items: dbTransaction.items.map(item => ({
-        ...item,
-        price: item.price.toString(),
-      })),
-    };
-
+    // Use the formatTransaction helper instead of manual conversion
+    // This ensures consistent handling of the receiptNumber
+    const transaction = formatTransaction(dbTransaction);
+    
     try {
+      console.log('Generating PDF for transaction:', id);
       const pdfBuffer = await generateReceipt(transaction);
+      console.log('PDF generated successfully, size:', pdfBuffer.length);
 
       return new NextResponse(pdfBuffer, {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="receipt-${id}.pdf"`,
+          'Content-Disposition': `attachment; filename="receipt-${transaction.receiptNumber}.pdf"`,
           'Content-Length': pdfBuffer.length.toString(),
         },
       });
@@ -63,9 +65,9 @@ export async function GET(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('Receipt API Error:', error);
     return NextResponse.json(
-      { error: 'Server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

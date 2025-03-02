@@ -2,9 +2,10 @@
 
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Share2, Printer, ArrowLeft } from "lucide-react"
+import { Share2, Download, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
+import { useState } from "react"
 
 export default function ReceiptPage() {
   const searchParams = useSearchParams()
@@ -13,6 +14,8 @@ export default function ReceiptPage() {
   const items = searchParams.get("items")?.split(",")
   const total = searchParams.get("total")
   const receiptNumber = searchParams.get("receiptNumber")
+  const id = window.location.pathname.split('/').pop() // Get the transaction ID from the URL
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return ""
@@ -34,44 +37,48 @@ export default function ReceiptPage() {
     }
   }
 
-  const handlePrint = () => {
-    // For mobile devices, offer PDF download
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      // Use html2canvas and jsPDF for mobile PDF generation
-      import('html2canvas').then(html2canvasModule => {
-        const html2canvas = html2canvasModule.default;
-        import('jspdf').then(jsPDFModule => {
-          const jsPDF = jsPDFModule.default;
-          
-          const receiptElement = document.querySelector('.bg-white') as HTMLElement;
-          if (!receiptElement) return;
-          
-          html2canvas(receiptElement, {
-            scale: 2, // Higher quality
-            useCORS: true,
-            logging: false
-          }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-              orientation: 'portrait',
-              unit: 'mm',
-              format: 'a4'
-            });
-            
-            // Calculate dimensions to fit the receipt on the PDF
-            const imgWidth = 210; // A4 width in mm
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            
-            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-            pdf.save(`Tool_Thread_Receipt_${receiptNumber || 'download'}.pdf`);
-          });
-        });
-      });
-    } else {
-      // Use standard print for desktop
-      window.print();
+  const handleDownloadPDF = async () => {
+    if (!id) {
+      alert("Transaction ID not found. Cannot generate PDF.");
+      return;
     }
-  }
+    
+    setIsGeneratingPDF(true);
+    
+    try {
+      // Use the server API to generate the PDF
+      const response = await fetch(`/api/receipts/${id}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate PDF');
+      }
+      
+      // Get the PDF as a blob
+      const blob = await response.blob();
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      // Use receiptNumber in the filename instead of transaction ID
+      a.download = `Receipt_${receiptNumber || id}.pdf`;
+      
+      // Append to the body and trigger download
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Failed to download PDF. Please try again.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   const handleShare = async () => {
     try {
@@ -97,7 +104,7 @@ export default function ReceiptPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      {/* Print/Share Controls - Hidden when printing */}
+      {/* Controls - Hidden when printing */}
       <div className="print:hidden mb-8 flex flex-col sm:flex-row gap-4 sm:gap-0 sm:justify-between sm:items-center">
         <Link href="/admin/transactions">
           <Button variant="ghost" className="p-0 h-auto text-primary-500 hover:text-primary-600 transition-colors font-medium">
@@ -107,15 +114,12 @@ export default function ReceiptPage() {
         </Link>
         <div className="flex gap-3">
           <Button 
-            onClick={handlePrint} 
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
             className="bg-primary-500 hover:bg-primary-600 text-white transition-colors font-medium flex-1 sm:flex-initial h-12 px-5"
           >
-            <Printer className="h-5 w-5 mr-2" />
-            {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-              typeof navigator !== 'undefined' ? navigator.userAgent : ''
-            ) 
-              ? "Download PDF" 
-              : "Print Receipt"}
+            <Download className="h-5 w-5 mr-2" />
+            {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
           </Button>
           <Button 
             onClick={handleShare} 
