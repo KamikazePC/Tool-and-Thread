@@ -35,9 +35,17 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/admin");
-      router.refresh();
-    } catch {
+      // Show success message
+      toast.success("Signed in successfully");
+      
+      // Add a small delay before navigation to ensure session is updated
+      setTimeout(() => {
+        router.push("/admin");
+        // Force a full page navigation instead of client-side transition
+        window.location.href = "/admin";
+      }, 500);
+    } catch (error) {
+      console.error("Sign-in error:", error);
       toast.error("Something went wrong");
     } finally {
       setIsLoading(false);

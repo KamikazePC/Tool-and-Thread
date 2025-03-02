@@ -14,7 +14,6 @@ export default function ReceiptPage() {
   const items = searchParams.get("items")?.split(",")
   const total = searchParams.get("total")
   const receiptNumber = searchParams.get("receiptNumber")
-  const id = window.location.pathname.split('/').pop() // Get the transaction ID from the URL
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
   const formatDate = (dateString: string | null) => {
@@ -38,8 +37,12 @@ export default function ReceiptPage() {
   }
 
   const handleDownloadPDF = async () => {
-    if (!id) {
-      alert("Transaction ID not found. Cannot generate PDF.");
+    // Extract the ID from URL path and validate it's numeric
+    const pathId = window.location.pathname.split('/').pop();
+    
+    // Ensure we have a valid numeric ID
+    if (!pathId || !/^\d+$/.test(pathId)) {
+      alert("Invalid transaction ID. Cannot generate PDF.");
       return;
     }
     
@@ -47,7 +50,7 @@ export default function ReceiptPage() {
     
     try {
       // Use the server API to generate the PDF
-      const response = await fetch(`/api/receipts/${id}`);
+      const response = await fetch(`/api/receipts/${pathId}`);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -68,7 +71,7 @@ export default function ReceiptPage() {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = `Receipt_${receiptNumber || id}.pdf`;
+        a.download = `Receipt_${receiptNumber || pathId}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -163,7 +166,6 @@ export default function ReceiptPage() {
         {/* Footer */}
         <div className="mt-12 text-center text-slate-500 text-sm">
           <p className="font-medium">Thank you for your business!</p>
-          <p className="mt-1">For questions or concerns, please contact us.</p>
         </div>
       </div>
     </div>
