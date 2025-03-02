@@ -3,11 +3,14 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "../../auth/config";
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  console.log('DELETE request received for transaction ID:', params.id);
+// Simple solution: use standard named export with direct parameter access
+export async function DELETE(req: NextRequest) {
+  // Extract the ID from the pathname (more reliable)
+  const pathname = req.nextUrl.pathname;
+  const idMatch = pathname.match(/\/api\/transactions\/(\d+)$/);
+  const idString = idMatch ? idMatch[1] : '';
+  
+  console.log('DELETE request received for transaction ID:', idString);
   
   try {
     const session = await getServerSession(authOptions);
@@ -18,11 +21,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Ensure we're working with a clean string ID from params
-    const idString = params.id.trim();
-    console.log('Transaction ID string:', idString);
-    
-    // Convert to integer
+    // Parse ID from path
     const id = parseInt(idString);
     console.log('Parsed transaction ID:', id, typeof id);
 
