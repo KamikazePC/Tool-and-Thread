@@ -326,14 +326,6 @@ export async function generateReceipt(transaction: Transaction): Promise<Buffer>
     font: 'sans'
   });
   
-  addText('For questions or concerns, please contact us.', centerX, footerY + 7, { 
-    fontSize: 9,
-    textColor: colors.slate[500], // text-slate-500
-    align: 'center',
-    font: 'sans',
-    lineHeight: typography.lineHeight.relaxed
-  });
-  
   // Convert to Buffer
   const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
   return pdfBuffer;

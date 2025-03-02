@@ -45,6 +45,10 @@ export async function GET(request: NextRequest) {
     try {
       console.log('Generating PDF for transaction:', id);
       const pdfBuffer = await generateReceipt(transaction);
+      
+      // Add a small delay to ensure PDF is fully generated
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       console.log('PDF generated successfully, size:', pdfBuffer.length);
 
       return new NextResponse(pdfBuffer, {
@@ -53,6 +57,7 @@ export async function GET(request: NextRequest) {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="receipt-${transaction.receiptNumber}.pdf"`,
           'Content-Length': pdfBuffer.length.toString(),
+          'Cache-Control': 'no-store', // Prevent caching
         },
       });
     } catch (pdfError) {

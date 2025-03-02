@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Share2, Download, ArrowLeft } from "lucide-react"
+import { Download, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { useState } from "react"
@@ -57,21 +57,28 @@ export default function ReceiptPage() {
       // Get the PDF as a blob
       const blob = await response.blob();
       
-      // Create a download link
+      // For mobile compatibility, use window.open with object URL
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      // Use receiptNumber in the filename instead of transaction ID
-      a.download = `Receipt_${receiptNumber || id}.pdf`;
       
-      // Append to the body and trigger download
-      document.body.appendChild(a);
-      a.click();
+      // On mobile, open in new tab
+      if (/Mobi|Android/i.test(navigator.userAgent)) {
+        window.open(url, '_blank');
+      } else {
+        // On desktop, trigger download
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Receipt_${receiptNumber || id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
       
-      // Clean up
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      // Clean up the URL after a short delay
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 1000);
+      
     } catch (error) {
       console.error('Error downloading PDF:', error);
       alert('Failed to download PDF. Please try again.');
@@ -80,27 +87,6 @@ export default function ReceiptPage() {
     }
   };
 
-  const handleShare = async () => {
-    try {
-      // Check if the Web Share API is supported
-      if (navigator.share) {
-        await navigator.share({
-          title: "Tool & Thread Receipt",
-          text: `Receipt #${receiptNumber} for ${buyer} - ${total}`,
-          url: window.location.href,
-        })
-      } else {
-        // Fallback for browsers that don't support Web Share API
-        // Copy the URL to clipboard
-        await navigator.clipboard.writeText(window.location.href);
-        alert("Receipt link copied to clipboard!");
-      }
-    } catch (error) {
-      console.error("Error sharing:", error)
-      // Additional fallback if clipboard API fails
-      prompt("Copy this link to share your receipt:", window.location.href);
-    }
-  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -120,13 +106,6 @@ export default function ReceiptPage() {
           >
             <Download className="h-5 w-5 mr-2" />
             {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
-          </Button>
-          <Button 
-            onClick={handleShare} 
-            className="bg-accent-500 hover:bg-accent-600 text-slate-800 transition-colors font-medium flex-1 sm:flex-initial h-12 px-5"
-          >
-            <Share2 className="h-5 w-5 mr-2" />
-            Share
           </Button>
         </div>
       </div>
