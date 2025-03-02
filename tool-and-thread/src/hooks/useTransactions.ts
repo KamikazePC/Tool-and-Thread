@@ -30,7 +30,7 @@ export function useTransactions() {
   // Use react-query mutation for deleting a transaction
   const deleteMutation = useMutation<number, Error, number>({
     mutationFn: async (id: number) => {
-      await axios.delete(`/api/transactions?id=${id}`);
+      await axios.delete(`/api/transactions/${id.toString()}`);
       return id;
     },
     onSuccess: (deletedId) => {

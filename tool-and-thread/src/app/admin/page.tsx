@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTransactions } from '@/hooks/useTransactions';
 import { CurrencyCode } from '@/lib/currency';
+import { Transaction } from '@/types';
 
 // Define currency symbols
 const currencySymbols: Record<CurrencyCode, string> = {
@@ -32,6 +33,23 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  const formatReceiptUrl = (transaction: Transaction) => {
+    const params = new URLSearchParams();
+    params.set('date', transaction.date.toString());
+    params.set('buyer', transaction.buyerName);
+    params.set('receiptNumber', transaction.receiptNumber);
+    params.set('items', transaction.items.map(item => 
+      `${item.quantity}x ${item.name} @ ${currencySymbols[transaction.currency as CurrencyCode]}${Number(item.price).toFixed(2)}`
+    ).join(','));
+    const total = transaction.items.reduce(
+      (sum, item) => sum + (Number(item.price) * item.quantity),
+      0
+    );
+    params.set('total', `${currencySymbols[transaction.currency as CurrencyCode]}${total.toFixed(2)}`);
+    params.set('currency', transaction.currency);
+    return `/receipt/${transaction.id}?${params.toString()}`;
+  };
 
   const recentTransactions = transactions.slice(0, 5);
   
@@ -159,7 +177,7 @@ export default function AdminPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/receipt/${transaction.id}`}>
+                        <Link href={formatReceiptUrl(transaction)}>
                           <Button variant="ghost" size="icon">
                             <Download className="h-4 w-4" />
                           </Button>
