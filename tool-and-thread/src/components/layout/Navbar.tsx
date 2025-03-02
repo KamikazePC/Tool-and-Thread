@@ -28,7 +28,7 @@ export default function Navbar() {
       onClick: () => signOut({ callbackUrl: "/login" }),
     },
   ] : (
-    pathname !== "/" ? [{ href: "/login", label: "Sign In" }] : []
+    pathname !== "/admin" ? [{ href: "/login", label: "Sign In" }] : []
   );
 
   return (
