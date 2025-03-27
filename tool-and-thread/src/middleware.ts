@@ -7,7 +7,7 @@ export default withAuth(
   },
   {
     pages: {
-      signIn: "/",
+      signIn: "/login",
     },
   }
 );

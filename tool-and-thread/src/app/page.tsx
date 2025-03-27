@@ -18,31 +18,45 @@ export default function LoginPage() {
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
-  
+
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-  
+
     try {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false, // Disables automatic redirection
+        redirect: false,
       });
-  
-      if (result?.ok) {
-        router.push("/admin"); // Redirect to the desired page
-      } else {
+
+      if (result?.error) {
         toast.error("Invalid credentials");
+        return;
       }
+
+      // Show success message
+      toast.success("Signed in successfully");
+      console.log("✅ Authentication successful, preparing to navigate...");
+
+      // Refresh the router cache first
+      router.refresh();
+
+      // Add a small delay to ensure session is updated
+      setTimeout(() => {
+        // Use callbackUrl if available, otherwise go to admin
+        const callbackUrl = new URLSearchParams(window.location.search).get(
+          "callbackUrl"
+        );
+        router.push(callbackUrl || "/admin");
+      }, 300);
     } catch (error) {
-      console.error("Sign-in error:", error);
-      toast.error("An error occurred. Please try again.");
+      console.error("❌ Sign-in error:", error);
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
   }
-  
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -56,7 +70,8 @@ export default function LoginPage() {
                 Welcome to Tool & Thread
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
-                Your one-stop solution for managing transactions and generating receipts efficiently.
+                Your one-stop solution for managing transactions and generating
+                receipts efficiently.
               </p>
             </div>
 
@@ -113,11 +128,7 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full"
-                >
+                <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? (
                     <>
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-white" />
@@ -149,8 +160,6 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-
-     
 
       {/* Footer */}
       <footer className="bg-background py-6">
