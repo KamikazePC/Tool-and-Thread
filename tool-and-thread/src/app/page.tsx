@@ -83,12 +83,7 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <form
-                onSubmit={onSubmit}
-                className="space-y-4"
-                method="POST"
-                action="/api/auth/callback/credentials"
-              >
+              <form onSubmit={onSubmit} className="space-y-4" method="POST">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
