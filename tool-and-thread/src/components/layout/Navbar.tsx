@@ -17,19 +17,21 @@ export default function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  const navItems = session ? [
-    { href: "/admin", label: "Dashboard" },
-    { href: "/admin/transactions", label: "Transactions" },
-    { href: "/admin/transactions/new", label: "New Transaction" },
-    { href: "/settings", label: "Settings" },
-    {
-      href: "#",
-      label: "Sign Out",
-      onClick: () => signOut({ callbackUrl: "/login" }),
-    },
-  ] : (
-    pathname !== "/admin" ? [{ href: "/login", label: "Sign In" }] : []
-  );
+  const navItems = session
+    ? [
+        { href: "/admin", label: "Dashboard" },
+        { href: "/admin/transactions", label: "Transactions" },
+        { href: "/admin/transactions/new", label: "New Transaction" },
+        { href: "/settings", label: "Settings" },
+        {
+          href: "#",
+          label: "Sign Out",
+          onClick: () => signOut({ callbackUrl: "/" }),
+        },
+      ]
+    : pathname !== "/admin"
+    ? [{ href: "/", label: "Sign In" }]
+    : [];
 
   return (
     <header className="border-b border-slate-200 bg-white">
@@ -38,9 +40,13 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/admin" className="flex items-center">
               <div className="mr-2 h-8 w-8 rounded-full bg-primary-50 flex items-center justify-center">
-                <span className="text-sm font-bold text-primary-500 font-serif">T&T</span>
+                <span className="text-sm font-bold text-primary-500 font-serif">
+                  T&T
+                </span>
               </div>
-              <span className="text-xl font-bold text-slate-800 font-serif tracking-tight">Tool & Thread</span>
+              <span className="text-xl font-bold text-slate-800 font-serif tracking-tight">
+                Tool & Thread
+              </span>
             </Link>
           </div>
 
@@ -62,19 +68,25 @@ export default function Navbar() {
           {navItems.length > 0 && (
             <Sheet>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" className="h-12 w-12 rounded-md">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 rounded-md"
+                >
                   <Menu className="h-6 w-6" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="bg-white">
                 <SheetHeader>
-                  <SheetTitle className="font-serif text-xl text-slate-800">Menu</SheetTitle>
+                  <SheetTitle className="font-serif text-xl text-slate-800">
+                    Menu
+                  </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col space-y-1 mt-6">
                   {navItems.map((item) => (
-                    <Link 
-                      key={item.href} 
+                    <Link
+                      key={item.href}
                       href={item.href}
                       className="w-full"
                       onClick={item.onClick}

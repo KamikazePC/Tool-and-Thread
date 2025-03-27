@@ -41,15 +41,7 @@ export default function LoginPage() {
 
       // Refresh the router cache first
       router.refresh();
-
-      // Add a small delay to ensure session is updated
-      setTimeout(() => {
-        // Use callbackUrl if available, otherwise go to admin
-        const callbackUrl = new URLSearchParams(window.location.search).get(
-          "callbackUrl"
-        );
-        router.push(callbackUrl || "/admin");
-      }, 300);
+      router.push("/admin");
     } catch (error) {
       console.error("❌ Sign-in error:", error);
       toast.error("Something went wrong");

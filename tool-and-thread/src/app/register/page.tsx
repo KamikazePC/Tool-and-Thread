@@ -149,11 +149,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-full"
-            >
+            <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-white" />
@@ -171,9 +167,7 @@ export default function RegisterPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                Or
-              </span>
+              <span className="bg-card px-2 text-muted-foreground">Or</span>
             </div>
           </div>
 
@@ -182,7 +176,7 @@ export default function RegisterPage() {
             <p className="text-sm text-muted-foreground">
               Already have an account?
             </p>
-            <Link href="/login" className="block">
+            <Link href="/" className="block">
               <Button variant="outline" className="w-full">
                 Sign in
               </Button>
