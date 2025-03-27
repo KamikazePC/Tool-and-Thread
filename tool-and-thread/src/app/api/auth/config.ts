@@ -10,7 +10,11 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "example@example.com" },
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "example@example.com",
+        },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -53,16 +57,16 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       // Make sure the user ID is set correctly from the token
       if (token) {
-        session.user = { 
-          id: token.sub || '', 
-          email: token.email || '', 
-          name: token.name
+        session.user = {
+          id: token.sub || "",
+          email: token.email || "",
+          name: token.name,
         };
-        
+
         // Add debug log
-        console.log('Session callback - user ID:', token.sub);
+        console.log("Session callback - user ID:", token.sub);
       }
-      
+
       return session;
     },
     async jwt({ token, user }) {
@@ -71,11 +75,22 @@ export const authOptions: NextAuthOptions = {
         token.sub = user.id;
         token.email = user.email;
         token.name = user.name;
-        
+
         // Add debug log
-        console.log('JWT callback - user ID:', user.id);
+        console.log("JWT callback - user ID:", user.id);
       }
       return token;
+    },
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
     },
   },
 };

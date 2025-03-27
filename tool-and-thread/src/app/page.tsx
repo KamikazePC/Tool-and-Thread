@@ -39,16 +39,10 @@ export default function LoginPage() {
       toast.success("Signed in successfully");
       console.log("✅ Authentication successful, preparing to navigate...");
 
-      // Add these debug logs
-      console.log("🧾 Pre-navigation session check");
-      const session = await fetch("/api/auth/session");
-      console.log("Session response:", await session.json());
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Give NextAuth a moment to set cookies and establish the session
-      setTimeout(() => {
-        router.refresh();
-        router.push("/admin");
-      }, 500);
+      router.refresh();
+      router.push("/admin");
     } catch (error) {
       console.error("❌ Sign-in error:", error);
       toast.error("Something went wrong");
