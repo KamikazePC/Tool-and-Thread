@@ -39,9 +39,16 @@ export default function LoginPage() {
       toast.success("Signed in successfully");
       console.log("✅ Authentication successful, preparing to navigate...");
 
-      // Refresh the router cache first
-      router.refresh();
-      router.push("/admin");
+      // Add these debug logs
+      console.log("🧾 Pre-navigation session check");
+      const session = await fetch("/api/auth/session");
+      console.log("Session response:", await session.json());
+
+      // Give NextAuth a moment to set cookies and establish the session
+      setTimeout(() => {
+        router.refresh();
+        router.push("/admin");
+      }, 500);
     } catch (error) {
       console.error("❌ Sign-in error:", error);
       toast.error("Something went wrong");
@@ -76,7 +83,12 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <form onSubmit={onSubmit} className="space-y-4">
+              <form
+                onSubmit={onSubmit}
+                className="space-y-4"
+                method="POST"
+                action="/api/auth/callback/credentials"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input

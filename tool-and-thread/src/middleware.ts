@@ -8,7 +8,6 @@ export default withAuth(
   {
     pages: {
       signIn: "/",
-      newUser: "/admin",
     },
   }
 );
