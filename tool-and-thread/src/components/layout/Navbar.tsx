@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/sheet";
 
 export default function Navbar() {
-  const pathname = usePathname();
   const { data: session } = useSession();
 
   const navItems = session
@@ -29,8 +27,6 @@ export default function Navbar() {
           onClick: () => signOut({ callbackUrl: "/" }),
         },
       ]
-    : pathname !== "/admin"
-    ? [{ href: "/", label: "Sign In" }]
     : [];
 
   return (

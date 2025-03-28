@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 // import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -9,11 +9,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export default function LoginPage() {
   // const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (session) {
+      window.location.href = "/admin";
+    }
+  }, [session]);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
