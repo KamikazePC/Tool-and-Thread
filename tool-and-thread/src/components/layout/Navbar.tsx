@@ -11,9 +11,18 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Close the mobile menu when the path changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   const navItems = session
     ? [
@@ -62,7 +71,7 @@ export default function Navbar() {
 
           {/* Mobile Navigation */}
           {navItems.length > 0 && (
-            <Sheet>
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button
                   variant="ghost"
@@ -73,7 +82,7 @@ export default function Navbar() {
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="bg-white">
+              <SheetContent side="right" className="bg-white">
                 <SheetHeader>
                   <SheetTitle className="font-serif text-xl text-slate-800">
                     Menu
@@ -85,7 +94,11 @@ export default function Navbar() {
                       key={item.href}
                       href={item.href}
                       className="w-full"
-                      onClick={item.onClick}
+                      onClick={() => {
+                        if (item.onClick) {
+                          setIsOpen(false);
+                        }
+                      }}
                     >
                       <Button
                         variant="ghost"
