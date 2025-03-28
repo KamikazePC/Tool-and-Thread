@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 export default function LoginPage() {
-  const router = useRouter();
+  // const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -38,11 +38,15 @@ export default function LoginPage() {
       // Show success message
       toast.success("Signed in successfully");
       console.log("✅ Authentication successful, preparing to navigate...");
+      console.log("Checking session before navigation...");
+      const session = await fetch("/api/auth/session");
+      console.log("Session data:", await session.json());
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      router.refresh();
-      router.push("/admin");
+      // router.refresh();
+      // router.push("/admin");
+      window.location.href = "/admin";
     } catch (error) {
       console.error("❌ Sign-in error:", error);
       toast.error("Something went wrong");
@@ -77,7 +81,7 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <form onSubmit={onSubmit} className="space-y-4" method="POST">
+              <form onSubmit={onSubmit} className="space-y-4" method="post">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
