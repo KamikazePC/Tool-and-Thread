@@ -95,8 +95,9 @@ export default function Navbar() {
                       href={item.href}
                       className="w-full"
                       onClick={() => {
+                        setIsOpen(false); // Add this to close the sheet
                         if (item.onClick) {
-                          setIsOpen(false);
+                          item.onClick(); // Remove the argument
                         }
                       }}
                     >
