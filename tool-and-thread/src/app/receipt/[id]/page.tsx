@@ -303,7 +303,9 @@ export default function ReceiptPage() {
       let currentY = margin + 10; // Start further down
       doc.setFontSize(22); // Slightly larger
       doc.setFont("helvetica", "bold");
-      doc.text("Tool & Thread", pageW / 2, currentY, { align: "center" });
+      doc.text("Fashion Equipment and Accessories", pageW / 2, currentY, {
+        align: "center",
+      });
       currentY += 8; // Space
 
       doc.setFontSize(14);
@@ -600,11 +602,11 @@ export default function ReceiptPage() {
         <div className="text-center mb-10">
           <div className="w-24 h-24 mx-auto mb-5 rounded-full bg-primary-50 flex items-center justify-center">
             <span className="text-2xl font-bold text-primary-500 font-serif">
-              T&T
+              FE&A
             </span>
           </div>
           <h1 className="text-3xl font-bold mb-2 text-slate-800 font-serif tracking-tight">
-            Tool & Thread
+            Fashion Equipment and Accessories
           </h1>
           <div className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 font-medium text-sm">
             Receipt #{receiptNumber}

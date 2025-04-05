@@ -72,7 +72,7 @@ export default function LoginPage() {
             {/* Left side - Welcome Text */}
             <div className="flex-1 text-center lg:text-left">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
-                Welcome to Tool & Thread
+                Welcome to Fashion Equipment and Accessories
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
                 Your one-stop solution for managing transactions and generating
@@ -169,7 +169,11 @@ export default function LoginPage() {
       {/* Footer */}
       <footer className="bg-background py-6">
         <div className="container px-4 mx-auto text-center text-sm text-muted-foreground">
-          <p> {new Date().getFullYear()} Tool & Thread. All rights reserved.</p>
+          <p>
+            {" "}
+            {new Date().getFullYear()} Fashion Equipment and Accessories. All
+            rights reserved.
+          </p>
         </div>
       </footer>
     </div>

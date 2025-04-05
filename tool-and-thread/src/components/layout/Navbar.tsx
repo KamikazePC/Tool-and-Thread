@@ -44,13 +44,13 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/admin" className="flex items-center">
-              <div className="mr-2 h-8 w-8 rounded-full bg-primary-50 flex items-center justify-center">
+              <div className="mr-2 h-12 w-12 rounded-full bg-primary-50 flex items-center justify-center">
                 <span className="text-sm font-bold text-primary-500 font-serif">
-                  T&T
+                  FE&A
                 </span>
               </div>
               <span className="text-xl font-bold text-slate-800 font-serif tracking-tight">
-                Tool & Thread
+                Fashion Equipment and Accessories
               </span>
             </Link>
           </div>
