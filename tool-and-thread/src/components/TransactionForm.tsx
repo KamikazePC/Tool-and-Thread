@@ -309,7 +309,7 @@ export default function TransactionForm({
                 )}
               </div>
 
-              <div className="col-span-2 sm:col-span-3">
+              {/* <div className="col-span-2 sm:col-span-3">
                 <Label
                   htmlFor={`item-description-${index}`}
                   className="text-sm font-semibold text-slate-700 mb-1.5 block"
@@ -325,7 +325,7 @@ export default function TransactionForm({
                   placeholder="Enter item description"
                   className="h-12 px-4 text-base"
                 />
-              </div>
+              </div> */}
 
               <div className="col-span-2 sm:col-span-1 flex justify-end items-end">
                 <Button
