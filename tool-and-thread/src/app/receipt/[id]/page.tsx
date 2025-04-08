@@ -370,7 +370,7 @@ export default function ReceiptPage() {
         console.log("AutoTable not available - creating manual table");
         doc.setFontSize(10);
 
-        const colWidths = [10, 85, 15, 30, 30]; // Adjusted widths
+        const colWidths = [30, 85, 15, 30, 30]; // Adjusted widths
         const rowHeight = 8; // Increased row height
         let currentX = margin;
 
