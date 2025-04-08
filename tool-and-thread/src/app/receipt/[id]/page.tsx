@@ -284,266 +284,272 @@ export default function ReceiptPage() {
         return;
       }
 
-      // --- Constants ---
+      // --- Constants with updated colors ---
       const pageW = doc.internal.pageSize.getWidth();
-      const pageH = doc.internal.pageSize.getHeight(); // Get page height
+      const pageH = doc.internal.pageSize.getHeight();
       const margin = 20;
       const contentW = pageW - margin * 2;
-      const primaryColorRGB: [number, number, number] = [79, 138, 208]; // Example: A shade of blue like primary-500
-      const textColorRGB: [number, number, number] = [51, 51, 51]; // Dark grey for text
-      const lightGrayRGB: [number, number, number] = [245, 245, 245]; // Light gray for striped rows
+      const primaryColorRGB = [13, 110, 110]; // #0D6E6E
+      const textColorRGB = [51, 65, 85]; // Slate-700
+      const lightGrayRGB = [241, 245, 249]; // Slate-100
+      const borderColorRGB = [226, 232, 240]; // Slate-200
+      const cornerRadius = 4;
 
       // --- Set Document Properties ---
       doc.setProperties({
         title: `Receipt #${receiptNumber || ""}`,
       });
-      doc.setTextColor(...textColorRGB);
+      doc.setTextColor(textColorRGB[0], textColorRGB[1], textColorRGB[2]);
 
       // --- Header ---
-      let currentY = margin + 10; // Start further down
-      doc.setFontSize(22); // Slightly larger
+      let currentY = margin + 5;
+
+      // Title with background card
+      doc.setFillColor(248, 250, 252); // Slate-50 background
+      doc.setDrawColor(borderColorRGB[0], borderColorRGB[1], borderColorRGB[2]);
+      doc.roundedRect(
+        margin,
+        currentY,
+        contentW,
+        15,
+        cornerRadius,
+        cornerRadius,
+        "FD"
+      );
+
+      doc.setTextColor(
+        primaryColorRGB[0],
+        primaryColorRGB[1],
+        primaryColorRGB[2]
+      );
+      doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text("Fashion Equipment and Accessories", pageW / 2, currentY, {
+      doc.text("Fashion Equipment and Accessories", pageW / 2, currentY + 9, {
         align: "center",
       });
-      currentY += 8; // Space
 
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "normal"); // Normal weight for receipt number
-      doc.text(`Receipt #${receiptNumber || ""}`, pageW / 2, currentY, {
+      currentY += 20;
+
+      // Receipt number strip with primary color
+      doc.setFillColor(
+        primaryColorRGB[0],
+        primaryColorRGB[1],
+        primaryColorRGB[2]
+      );
+      doc.roundedRect(
+        margin,
+        currentY,
+        contentW,
+        10,
+        cornerRadius,
+        cornerRadius,
+        "F"
+      );
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.text(`Receipt #${receiptNumber || ""}`, pageW / 2, currentY + 6, {
         align: "center",
       });
-      currentY += 15; // More space before details
 
-      // --- Transaction Details (Improved Layout) ---
-      doc.setFontSize(11); // Consistent small size for labels/values
+      currentY += 15;
+
+      // --- Transaction Details with card styling ---
+      doc.setFillColor(248, 250, 252); // Slate-50 background
+      doc.setDrawColor(borderColorRGB[0], borderColorRGB[1], borderColorRGB[2]);
+      doc.roundedRect(
+        margin,
+        currentY,
+        contentW,
+        25,
+        cornerRadius,
+        cornerRadius,
+        "FD"
+      );
+
+      doc.setTextColor(textColorRGB[0], textColorRGB[1], textColorRGB[2]);
+      doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
-      doc.text("Date:", margin, currentY);
+      doc.text("Date:", margin + 10, currentY + 8);
       doc.setFont("helvetica", "normal");
-      doc.text(formatDate(date), margin + 25, currentY); // Indent value
+      doc.text(formatDate(date), margin + 30, currentY + 8);
 
       doc.setFont("helvetica", "bold");
-      doc.text("Time:", pageW / 2, currentY); // Use mid-page for second column
+      doc.text("Time:", pageW / 2, currentY + 8);
       doc.setFont("helvetica", "normal");
-      doc.text(formatTime(date), pageW / 2 + 25, currentY);
-      currentY += 7; // Line spacing
+      doc.text(formatTime(date), pageW / 2 + 25, currentY + 8);
 
       doc.setFont("helvetica", "bold");
-      doc.text("Customer:", margin, currentY);
+      doc.text("Customer:", margin + 10, currentY + 18);
       doc.setFont("helvetica", "normal");
-      doc.text(buyer || "N/A", margin + 25, currentY);
-      currentY += 15; // More space before items
+      doc.text(buyer || "N/A", margin + 30, currentY + 18);
 
-      // --- Items Section Header ---
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("Items Purchased", margin, currentY);
-      currentY += 8; // Space before table
+      currentY += 30;
 
       // --- Prepare Items Table Data ---
-      const tableHeaders = [
-        "S/N",
-        "Description",
-        "Qty", // Shorter header
-        "Unit Cost",
-        "Total",
-      ];
+      const tableHeaders = ["S/N", "Description", "Qty", "Unit Cost", "Total"];
+
+      // Fix Naira currency symbol issue by using "NGN" text instead of the symbol
       const itemsTableData = parsedItemsForRender.map((item, index) => {
         const description = item.description
-          ? `${item.name} (${item.description})` // Combine name and desc
+          ? `${item.name} (${item.description})`
           : item.name;
+        const currencySymbol = currencySymbols[currency]
+          ? currencySymbols[currency]
+          : "NGN";
         return [
           index + 1,
           description,
           item.quantity,
-          currencySymbols[currency] + " " + item.price.toFixed(2),
-          currencySymbols[currency] + " " + item.total.toFixed(2),
+          `${currencySymbol} ${item.price.toFixed(2)}`,
+          `${currencySymbol} ${item.total.toFixed(2)}`,
         ];
       });
-      // --- End Prepare ---
 
       // --- Items Table ---
-      let finalY = currentY; // Use currentY as starting point
-
       if (typeof autoTable !== "function") {
-        // Manual Table Fallback (Styled to mimic striped)
+        // Manual table implementation
         console.log("AutoTable not available - creating manual table");
-        doc.setFontSize(10);
-
-        const colWidths = [30, 85, 15, 30, 30]; // Adjusted widths
-        const rowHeight = 8; // Increased row height
-        let currentX = margin;
-
-        // Header
-        doc.setFillColor(...primaryColorRGB); // Use primary color
-        doc.setTextColor(255, 255, 255);
-        doc.setFont("helvetica", "bold");
-        tableHeaders.forEach((header, i) => {
-          doc.rect(currentX, finalY, colWidths[i], rowHeight, "F");
-          // Center S/N and Qty headers
-          const headerAlign = [0, 2].includes(i) ? "center" : "left";
-          const textX =
-            headerAlign === "center"
-              ? currentX + colWidths[i] / 2
-              : currentX + 2;
-          doc.text(header, textX, finalY + rowHeight / 2 + 1.5, {
-            align: headerAlign,
-          }); // Center vertically
-          currentX += colWidths[i];
-        });
-        finalY += rowHeight;
-
-        // Rows
-        doc.setTextColor(...textColorRGB);
-        doc.setFont("helvetica", "normal");
-        itemsTableData.forEach((row, index) => {
-          currentX = margin;
-          const isEven = index % 2 !== 0; // Stripe odd rows (0-indexed)
-          if (isEven) {
-            doc.setFillColor(...lightGrayRGB); // Light gray fill
-            doc.rect(margin, finalY, contentW, rowHeight, "F");
-          }
-
-          row.forEach((cell, i) => {
-            doc.setDrawColor(...textColorRGB); // Ensure borders are dark
-            // Draw horizontal lines only (mimic striped theme)
-            doc.line(
-              margin,
-              finalY + rowHeight,
-              pageW - margin,
-              finalY + rowHeight
-            );
-
-            // Align numeric columns (Qty, Unit, Total) to the right, S/N center
-            const textAlign = [0].includes(i)
-              ? "center"
-              : [2, 3, 4].includes(i)
-              ? "right"
-              : "left";
-            const textX =
-              textAlign === "right"
-                ? currentX + colWidths[i] - 2
-                : textAlign === "center"
-                ? currentX + colWidths[i] / 2
-                : currentX + 2;
-
-            // Handle potential text overflow for Description
-            if (i === 1) {
-              // Description column
-              const splitText = doc.splitTextToSize(
-                String(cell),
-                colWidths[i] - 4
-              ); // Max width with padding
-              doc.text(splitText, textX, finalY + rowHeight / 2 + 1.5, {
-                align: textAlign,
-                baseline: "middle",
-              });
-            } else {
-              doc.text(String(cell), textX, finalY + rowHeight / 2 + 1.5, {
-                align: textAlign,
-                baseline: "middle",
-              }); // Center vertically
-            }
-            currentX += colWidths[i];
-          });
-          finalY += rowHeight;
-        });
-
-        finalY += 5; // Padding after manual table
       } else {
-        // Use autoTable
-        console.log("Using autoTable function");
+        // Use autoTable with updated styling
         try {
           autoTable(doc, {
             startY: currentY,
             head: [tableHeaders],
             body: itemsTableData,
-            theme: "striped", // Use striped theme
+            theme: "striped",
             headStyles: {
-              fillColor: primaryColorRGB, // Use primary color
+              fillColor: [
+                primaryColorRGB[0],
+                primaryColorRGB[1],
+                primaryColorRGB[2],
+              ],
               textColor: [255, 255, 255],
               fontStyle: "bold",
-              halign: "left", // Default left, override below
-              fontSize: 10, // Slightly smaller header font
-              cellPadding: 2.5, // More padding
+              halign: "left",
+              fontSize: 10,
             },
             styles: {
-              fontSize: 10,
-              cellPadding: 2.5, // More padding
-              textColor: textColorRGB,
+              fontSize: 9,
+              cellPadding: 3,
+              textColor: [textColorRGB[0], textColorRGB[1], textColorRGB[2]],
             },
             columnStyles: {
-              0: { cellWidth: 10, halign: "center" }, // S/N
-              1: { cellWidth: "auto" }, // Description
-              2: { halign: "right", cellWidth: 15 }, // Qty
-              3: { halign: "right", cellWidth: 30 }, // Unit Cost
-              4: { halign: "right", cellWidth: 30 }, // Total
+              0: { cellWidth: 10, halign: "center" },
+              1: { cellWidth: "auto" },
+              2: { halign: "right", cellWidth: 15 },
+              3: { halign: "right", cellWidth: 30 },
+              4: { halign: "right", cellWidth: 30 },
             },
             alternateRowStyles: {
-              fillColor: lightGrayRGB, // Light gray for striping
+              fillColor: [lightGrayRGB[0], lightGrayRGB[1], lightGrayRGB[2]],
             },
             margin: { left: margin, right: margin },
-            didParseCell: (data) => {
-              // Center header text for S/N and Qty
-              if (data.section === "head") {
-                if (data.column.index === 0 || data.column.index === 2) {
-                  data.cell.styles.halign = "center";
-                }
-              }
-            },
           });
-
-          finalY = doc.lastAutoTable?.finalY
-            ? doc.lastAutoTable.finalY + 10
-            : currentY + itemsTableData.length * 8 + 20; // Add more space after table
         } catch (autoTableError) {
           console.error("Error using autoTable:", autoTableError);
-          finalY = currentY + itemsTableData.length * 8 + 20; // Fallback estimate
         }
       }
 
+      const finalY = doc.lastAutoTable?.finalY
+        ? doc.lastAutoTable.finalY + 5
+        : currentY + itemsTableData.length * 8 + 20;
+
       // --- Grand Total ---
       const grandTotal = grandTotalForRender;
-      const totalX = pageW - margin; // Right margin edge
 
+      // Create a right-aligned card for the total
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(
+        primaryColorRGB[0],
+        primaryColorRGB[1],
+        primaryColorRGB[2]
+      );
+      doc.roundedRect(
+        pageW - margin - 80,
+        finalY,
+        80,
+        30,
+        cornerRadius,
+        cornerRadius,
+        "FD"
+      );
+
+      // Grand Total Label and Value
+      doc.setTextColor(
+        primaryColorRGB[0],
+        primaryColorRGB[1],
+        primaryColorRGB[2]
+      );
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text("Grand Total:", totalX - 35, finalY, { align: "right" });
+      doc.text("Grand Total:", pageW - margin - 70, finalY + 10);
 
-      doc.setFontSize(12); // Make total value slightly larger
-      doc.setFont("helvetica", "bold");
+      // Use NGN text instead of symbol
+      doc.setFontSize(12);
       doc.text(
-        `${currencySymbols[currency]}${grandTotal.toFixed(2)}`,
-        totalX,
-        finalY,
-        { align: "right" }
+        `${currencySymbols[currency]} ${grandTotal.toFixed(2)}`,
+        pageW - margin - 10,
+        finalY + 10,
+        {
+          align: "right",
+        }
       );
-      finalY += 8; // Space after numerical total
 
-      // --- Grand Total in Words ---
+      // Amount in words directly below the total
       const totalInWords = numToWords(grandTotal, currency);
-      doc.setFontSize(10);
+      doc.setFontSize(8);
       doc.setFont("helvetica", "italic");
+      doc.setTextColor(textColorRGB[0], textColorRGB[1], textColorRGB[2]);
       const wordsLines = doc.splitTextToSize(
         `Amount in words: ${totalInWords}`,
-        contentW // Use content width for wrapping
+        70
       );
-      doc.text(wordsLines, margin, finalY);
-      finalY += wordsLines.length * 4 + 15; // Adjust spacing based on lines
+      doc.text(wordsLines, pageW - margin - 10, finalY + 15, {
+        align: "right",
+      });
 
-      // --- Footer (Position near bottom) ---
-      const footerY = pageH - margin - 20; // Position footer consistently near the bottom
-      finalY = Math.max(finalY, footerY); // Ensure footer doesn't overlap content
+      // --- Footer ---
+      const footerY = pageH - margin - 15;
 
-      doc.setFontSize(10);
+      // Center the signature in footer with text and line on same line
+      doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
-      doc.text("Signature:", margin, finalY);
-      doc.setLineWidth(0.3);
-      doc.line(margin + 25, finalY, margin + 85, finalY); // Longer signature line
 
-      // Center "Thank you" message below signature
-      finalY += 10;
-      doc.text("Thank you for your business!", pageW / 2, finalY, {
+      // Calculate signature text width
+      const signatureText = "Signature:";
+      const signatureTextWidth = doc.getTextWidth(signatureText);
+      const lineWidth = 60;
+      const totalWidth = signatureTextWidth + 5 + lineWidth; // Text + 5 units spacing + line
+
+      // Position signature text and line on same line, centered together
+      const startX = pageW / 2 - totalWidth / 2;
+
+      // Draw signature text
+      doc.text(signatureText, startX, footerY);
+
+      // Draw line on same Y level, after the text
+      doc.setLineWidth(0.3);
+      doc.setDrawColor(
+        primaryColorRGB[0],
+        primaryColorRGB[1],
+        primaryColorRGB[2]
+      );
+      doc.line(
+        startX + signatureTextWidth + 5,
+        footerY - 1,
+        startX + totalWidth,
+        footerY - 1
+      );
+
+      // Thank you message
+      doc.setTextColor(
+        primaryColorRGB[0],
+        primaryColorRGB[1],
+        primaryColorRGB[2]
+      );
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("Thank you for your business!", pageW / 2, footerY + 10, {
         align: "center",
       });
 
@@ -557,7 +563,7 @@ export default function ReceiptPage() {
             `<iframe width='100%' height='100%' src='${pdfDataUri}' title='Receipt Preview'></iframe>`
           );
         } else {
-          alert("Please allow popups to view the PDF."); // Inform user if popup blocked
+          alert("Please allow popups to view the PDF.");
         }
       } else {
         // Desktop: Trigger download
